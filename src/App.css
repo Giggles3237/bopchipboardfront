@@ -1,38 +1,107 @@
+:root {
+  --bmw-blue: #0653B6;
+  --mini-green: #70B62C;
+  --light-gray: #f0f0f0;
+  --dark-gray: #333333;
+}
+
 .App {
-  text-align: center;
+  font-family: Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+nav {
+  background-color: var(--light-gray);
+  padding: 10px 0;
+  margin-bottom: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+nav ul {
+  list-style-type: none;
+  padding: 0;
   display: flex;
-  flex-direction: column;
+  justify-content: space-around;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+}
+
+nav ul li a {
+  color: var(--dark-gray);
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+nav ul li a:hover {
+  background-color: var(--bmw-blue);
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+h1 {
+  color: var(--dark-gray);
+  text-align: center;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.search-bar {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.search-bar input {
+  width: 300px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+button {
+  background-color: var(--bmw-blue);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #043584;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.add-sale-button {
+  background-color: var(--bmw-blue);
+  color: white;
+}
+
+.add-sale-button:hover {
+  background-color: #043584;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 300px;
+  padding: 8px;
+  margin: 20px auto;
+  display: block;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--bmw-blue);
+  box-shadow: 0 0 5px rgba(6, 83, 182, 0.5);
 }

@@ -1,0 +1,74 @@
+/* General Chip Styles */
+.chip {
+  background-color: #f0f0f0;
+  padding: 10px;
+  margin: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth transition */
+  cursor: pointer;
+  width: 150px;
+  opacity: 1;
+  position: relative;
+  border-radius: 0px; /* No rounded corners */
+  border: none; /* No border */
+}
+
+/* Delivered Units - No tilt */
+.chip.delivered {
+  transform: rotate(0deg); /* No tilt for delivered cars */
+  opacity: 1; /* Fully opaque */
+}
+
+/* Pending Units - Tilted */
+.chip.pending {
+  transform: rotate(10deg); /* Tilt for pending units */
+  opacity: 0.7; /* Optional: Slight transparency for pending units */
+}
+
+/* Hover Effect */
+.chip:hover {
+  transform: rotate(0deg) !important; /* Straighten on hover */
+  opacity: 1; /* Fully opaque on hover */
+}
+
+/* Stock number style */
+.stock-number {
+  font-weight: bold;
+}
+
+/* Hover Information */
+.hover-info {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 5px;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  transform: translateX(10px);
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Sale Type Styles */
+.new-bmw {
+  background-color: #d1e7ff;
+}
+
+.new-mini {
+  background-color: #ffebd1;
+}
+
+.used-cpo {
+  background-color: #f0e5d1;
+}
+
+.default {
+  background-color: #f0f0f0;
+}
+
+/* CPO Star */
+.cpo-star {
+  color: gold;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}

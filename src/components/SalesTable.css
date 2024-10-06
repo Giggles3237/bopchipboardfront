@@ -1,0 +1,142 @@
+:root {
+  --bmw-blue: #0066B1;
+  --mini-green: #70B62C;
+  --white: #ffffff;
+  --light-gray: #f2f2f2;
+  --dark-gray: #333333;
+  --border-color: #cccccc;
+}
+
+.sales-table {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sales-table table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.sales-table th,
+.sales-table td {
+  border: 1px solid var(--border-color);
+  padding: 12px 8px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sales-table th {
+  background-color: var(--bmw-blue);
+  color: var(--white);
+  font-weight: bold;
+}
+
+.sales-table .th-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.sales-table .th-content span {
+  cursor: pointer;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+}
+
+.sales-table .th-content input {
+  width: calc(100% - 6px);
+  padding: 4px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.8em;
+  background-color: var(--white);
+  color: var(--dark-gray);
+}
+
+.sales-table tr:nth-child(even) {
+  background-color: var(--light-gray);
+}
+
+.sales-table tr:hover {
+  background-color: #e6f2ff;
+}
+
+.sales-table button {
+  margin-right: 5px;
+  padding: 6px 12px;
+  background-color: var(--bmw-blue);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8em;
+  transition: background-color 0.3s ease;
+}
+
+.sales-table button:hover {
+  background-color: #005190;
+}
+
+.sales-table button:last-child {
+  background-color: #6F6F6F;
+}
+
+.sales-table button:last-child:hover {
+  background-color: #4C4C4C;
+}
+
+.sales-table button:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+.sales-table .search-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Column-specific widths */
+.sales-table .column-stockNumber { width: 8%; }
+.sales-table .column-clientName { width: 12%; }
+.sales-table .column-year { width: 5%; }
+.sales-table .column-make { width: 8%; }
+.sales-table .column-model { width: 10%; }
+.sales-table .column-color { width: 8%; }
+.sales-table .column-advisor { width: 10%; }
+.sales-table .column-delivered { width: 7%; }
+.sales-table .column-deliveryDate { width: 10%; }
+.sales-table .column-type { width: 8%; }
+.sales-table .column-actions { width: 14%; }
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .sales-table th,
+  .sales-table td {
+    font-size: 0.9em;
+  }
+  
+  .sales-table .th-content input {
+    font-size: 0.75em;
+  }
+}
+
+@media (max-width: 992px) {
+  .sales-table th,
+  .sales-table td {
+    font-size: 0.8em;
+  }
+  
+  .sales-table .th-content input {
+    font-size: 0.7em;
+  }
+}

@@ -1,0 +1,16 @@
+.date-range-picker {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .date-range-picker .react-datepicker-wrapper {
+    width: auto;
+  }
+  
+  .date-range-picker input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }

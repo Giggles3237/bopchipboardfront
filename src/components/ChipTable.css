@@ -1,0 +1,76 @@
+:root {
+  --bmw-blue: #0066B1;
+  --mini-green: #70B62C;
+  --white: #ffffff;
+  --black: #000000;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 100px;
+  padding: 0 15px;
+  margin: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.chip:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.chip.new-bmw {
+  background-color: var(--white);
+  color: var(--black);
+  border: 1px solid var(--bmw-blue);
+}
+
+.chip.new-mini {
+  background-color: var(--mini-green);
+  color: var(--white);
+}
+
+.chip.used-cpo {
+  background-color: var(--bmw-blue);
+  color: var(--white);
+}
+
+.chip.default {
+  background-color: var(--white);
+  color: var(--black);
+  border: 1px solid var(--black);
+}
+
+.chip.pending {
+  transform: rotate(10deg);
+}
+
+.chip.pending:hover {
+  transform: rotate(10deg) translateY(-3px);
+}
+
+.hover-info {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--white);
+  color: var(--black);
+  padding: 10px;
+  width: 200px;
+  z-index: 20;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hover-info p {
+  margin: 5px 0;
+  font-size: 12px;
+}
