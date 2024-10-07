@@ -4,16 +4,21 @@ import './ChipTable.css';
 
 function ChipTable({ sales, onEdit }) {
   const calculateTotals = () => {
-    return sales.reduce((acc, sale) => {
-      if (sale.type === 'New BMW') {
-        acc.whiteBMW++;
-      } else if (sale.type === 'New MINI') {
-        acc.greenMINI++;
-      } else if (['CPO BMW', 'CPO MINI', 'Used BMW', 'Used MINI'].includes(sale.type)) {
-        acc.blueUsed++;
-      }
-      return acc;
-    }, { whiteBMW: 0, greenMINI: 0, blueUsed: 0 });
+    return sales.reduce(
+      (acc, sale) => {
+        if (sale.type === 'New BMW') {
+          acc.whiteBMW++;
+        } else if (sale.type === 'New MINI') {
+          acc.greenMINI++;
+        } else if (
+          ['CPO BMW', 'CPO MINI', 'Used BMW', 'Used MINI'].includes(sale.type)
+        ) {
+          acc.blueUsed++;
+        }
+        return acc;
+      },
+      { whiteBMW: 0, greenMINI: 0, blueUsed: 0 }
+    );
   };
 
   const totals = calculateTotals();
@@ -22,14 +27,30 @@ function ChipTable({ sales, onEdit }) {
     if (!acc[sale.advisor]) {
       acc[sale.advisor] = { delivered: 0, pending: 0, sales: [] };
     }
-    acc[sale.advisor][sale.delivered === 'yes' ? 'delivered' : 'pending']++;
+
+    // Adjust the condition based on the actual format of the delivered field
+    if (
+      sale.delivered === '1' ||
+      sale.delivered === 1 ||
+      sale.delivered === true ||
+      sale.delivered === 'Yes'
+    ) {
+      acc[sale.advisor].delivered++;
+    } else {
+      acc[sale.advisor].pending++;
+    }
+
     acc[sale.advisor].sales.push(sale);
     return acc;
   }, {});
 
-  const sortedAdvisors = Object.entries(groupedSales).sort((a, b) => 
-    b[1].delivered - a[1].delivered
-  );
+  const sortedAdvisors = Object.entries(groupedSales).sort((a, b) => {
+    if (b[1].delivered !== a[1].delivered) {
+      return b[1].delivered - a[1].delivered;
+    } else {
+      return b[1].pending - a[1].pending; // Adjust based on your preference
+    }
+  });
 
   const formatAdvisorName = (advisor) => {
     const parts = advisor.split(' ');
@@ -42,7 +63,9 @@ function ChipTable({ sales, onEdit }) {
       <div className="totals-container">
         <div className="total-item white-bmw">New BMW: {totals.whiteBMW}</div>
         <div className="total-item green-mini">New MINI: {totals.greenMINI}</div>
-        <div className="total-item blue-used">CPO & Used: {totals.blueUsed}</div>
+        <div className="total-item blue-used">
+          CPO & Used: {totals.blueUsed}
+        </div>
       </div>
       {sortedAdvisors.map(([advisor, data]) => (
         <div key={advisor} className="advisor-group">
@@ -50,7 +73,7 @@ function ChipTable({ sales, onEdit }) {
             {`${formatAdvisorName(advisor)} ${data.delivered} (${data.pending})`}
           </h2>
           <div className="chips-container">
-            {data.sales.map(sale => (
+            {data.sales.map((sale) => (
               <Chip key={sale.id} sale={sale} onEdit={onEdit} />
             ))}
           </div>
