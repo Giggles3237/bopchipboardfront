@@ -8,6 +8,7 @@ import ChipTable from './components/ChipTable';
 import SalesTable from './components/SalesTable';
 import EditSaleForm from './components/EditSaleForm';
 import DateRangePicker from './components/DateRangePicker';
+import Header from './components/Header';
 
 const API_BASE_URL = 'https://bopchipboard-c66df77a754d.herokuapp.com/api'; // Update this to match your backend server's address
 
@@ -126,6 +127,7 @@ function App() {
   return (
     <Router>
       <div className="App">
+        <Header />
         <nav>
           <ul>
             <li><Link to="/">Chip View</Link></li>

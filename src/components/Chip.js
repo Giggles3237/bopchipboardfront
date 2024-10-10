@@ -28,6 +28,8 @@ function Chip({ sale, onEdit }) {
   const isDelivered = sale.delivered === 1;
   const chipClass = `chip ${getChipClass()} ${isDelivered ? 'delivered' : 'pending'}`;
 
+  const isCPO = sale.type === 'CPO BMW' || sale.type === 'CPO MINI';
+
   const handleClick = () => {
     onEdit(sale);
   };
@@ -39,7 +41,10 @@ function Chip({ sale, onEdit }) {
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
     >
-      <span className="stock-number">{sale.stockNumber}</span>
+      <span className="stock-number">
+        {sale.stockNumber}
+        {isCPO && <span className="gold-star">★</span>}
+      </span>
       {isHovered && (
         <div className="hover-info">
           <p>{`${sale.color} ${sale.year} ${sale.make} ${sale.model}`}</p>

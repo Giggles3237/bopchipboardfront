@@ -72,3 +72,9 @@
   top: 10px;
   right: 10px;
 }
+
+/* Gold Star */
+.gold-star {
+  color: gold;
+  margin-left: 5px;
+}

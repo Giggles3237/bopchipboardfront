@@ -43,7 +43,6 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Submitting sale:', formData); // Debugging log
     onSubmit({
       ...formData,
       deliveryDate: formData.deliveryDate ? formData.deliveryDate.toISOString() : null
@@ -57,6 +56,20 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
     'New MINI',
     'CPO MINI',
     'Used MINI'
+  ];
+
+  const advisors = [
+    'Brayden Wild',
+    'Dave Dzambo',
+    'Ed Mathieu',
+    'Evan Cambest',
+    'Gregg Lewis',
+    'Kyle Behrend',
+    'Laurene Willis',
+    'Mark Entress',
+    'Mike Diaz',
+    'Morgan McLane',
+    'House'
   ];
 
   return (
@@ -132,14 +145,18 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
           </div>
           <div>
             <label htmlFor="advisor">Advisor:</label>
-            <input
-              type="text"
+            <select
               id="advisor"
               name="advisor"
               value={formData.advisor}
               onChange={handleChange}
               required
-            />
+            >
+              <option value="">Select Advisor</option>
+              {advisors.map((advisor, index) => (
+                <option key={index} value={advisor}>{advisor}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label htmlFor="delivered">Delivered:</label>

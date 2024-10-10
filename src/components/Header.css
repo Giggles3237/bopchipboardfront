@@ -1,0 +1,28 @@
+#site-logo {
+    width: 200px;
+    height: auto; /* Maintains aspect ratio */
+}
+
+@media (max-width: 768px) {
+    #site-logo {
+        width: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    #site-logo {
+        width: 120px;
+    }
+}
+
+header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+nav {
+    margin-left: auto;
+    /* Additional navigation styling */
+}

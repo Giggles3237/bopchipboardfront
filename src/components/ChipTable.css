@@ -74,3 +74,17 @@
   margin: 5px 0;
   font-size: 12px;
 }
+/* Advisor Name Styling */
+.advisor-name {
+  /* Remove or update any existing alignment properties */
+  /* Example: If it was centered before */
+  /* text-align: center; */ /* Remove this line if present */
+
+  /* Add left alignment */
+  text-align: left;
+  
+  /* Optional: Add padding or margin for better spacing */
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  color: #333; /* Adjust color as needed */
+}

@@ -22,7 +22,8 @@ function SalesTable({ sales, onEdit, onDelete }) {
   const filteredSales = sales.filter(sale => {
     return Object.entries(filters).every(([column, value]) => {
       if (!value) return true;
-      return sale[column].toString().toLowerCase().includes(value.toLowerCase());
+      const saleValue = sale[column];
+      return saleValue != null && saleValue.toString().toLowerCase().includes(value.toLowerCase());
     });
   });
 
