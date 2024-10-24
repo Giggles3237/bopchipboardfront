@@ -3,6 +3,15 @@
   --mini-green: #70B62C;
   --light-gray: #f0f0f0;
   --dark-gray: #333333;
+  --background-color: #ffffff;
+  --text-color: #000000;
+}
+
+.night-mode {
+  --background-color: #121212;
+  --text-color: #e0e0e0;
+  --light-gray: #2a2a2a;
+  --dark-gray: #e0e0e0;
 }
 
 .App {
@@ -10,7 +19,8 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  /* text-align: center; */
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 nav {
@@ -28,7 +38,7 @@ nav ul {
 }
 
 nav ul li a {
-  color: var(--dark-gray);
+  color: var(--text-color);
   text-decoration: none;
   font-weight: bold;
   padding: 8px 16px;
@@ -42,7 +52,7 @@ nav ul li a:hover {
 }
 
 h1 {
-  color: var(--dark-gray);
+  color: var(--text-color);
   text-align: center;
 }
 
@@ -55,6 +65,9 @@ h1 {
   width: 300px;
   padding: 10px;
   font-size: 16px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--dark-gray);
 }
 
 button {
@@ -81,6 +94,11 @@ button:hover {
   text-align: center;
 }
 
+.night-mode .error-message {
+  background-color: #4a0f0f;
+  color: #ff9999;
+}
+
 .add-sale-button {
   background-color: var(--bmw-blue);
   color: white;
@@ -97,8 +115,10 @@ button:hover {
   margin: 20px auto;
   display: block;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--dark-gray);
   border-radius: 4px;
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 .search-input:focus {

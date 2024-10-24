@@ -9,6 +9,7 @@ import SalesTable from './components/SalesTable';
 import EditSaleForm from './components/EditSaleForm';
 import DateRangePicker from './components/DateRangePicker';
 import Header from './components/Header';
+import Inbound from './components/Inbound';
 
 const API_BASE_URL = 'https://bopchipboard-c66df77a754d.herokuapp.com/api'; // Update this to match your backend server's address
 
@@ -124,6 +125,17 @@ function App() {
     );
   };
 
+  // Remove the following function:
+  // const fetchPendingSales = async () => {
+  //   try {
+  //     const response = await axios.get(`${API_BASE_URL}/pending-sales`);
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error('Error fetching pending sales:', error);
+  //     throw error;
+  //   }
+  // };
+
   return (
     <Router>
       <div className="App">
@@ -133,6 +145,7 @@ function App() {
             <li><Link to="/">Chip View</Link></li>
             <li><Link to="/table">Sales Table</Link></li>
             <li><Link to="/add">Add New Sale</Link></li>
+            <li><Link to="/inbound">Inbound</Link></li>
           </ul>
         </nav>
 
@@ -190,6 +203,7 @@ function App() {
             </>
           } />
           <Route path="/add" element={<AddNewSale />} />
+          <Route path="/inbound" element={<Inbound />} />
         </Routes>
 
         {editingSale && (

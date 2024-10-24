@@ -1,0 +1,84 @@
+:root {
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --border-color: #ccc;
+  --header-background: #f0f0f0;
+  --cell-background: #f0f0f0;
+  --hover-background: #e0e0e0;
+}
+
+.night-mode {
+  --background-color: #121212;
+  --text-color: #e0e0e0;
+  --border-color: #555555;
+  --header-background: #2a2a2a;
+  --cell-background: #1e1e1e;
+  --hover-background: #2a3f50;
+}
+
+.inbound-container {
+  padding: 20px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.inbound-grid {
+  display: grid;
+  grid-template-columns: auto repeat(4, 1fr);
+  gap: 1px;
+  background-color: var(--border-color);
+  border: 1px solid var(--border-color);
+}
+
+.header-row, .advisor-row {
+  display: contents;
+}
+
+.consultant-header, .month-header, .advisor-name, .month-cell {
+  background-color: var(--header-background);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.consultant-header, .month-header {
+  font-weight: bold;
+  justify-content: center;
+  background-color: var(--header-background);
+}
+
+.advisor-name {
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.month-cell {
+  flex-wrap: wrap;
+  gap: 5px;
+  align-content: flex-start;
+  min-height: 40px;
+  background-color: var(--cell-background);
+}
+
+h1 {
+  color: var(--text-color);
+  margin-bottom: 20px;
+}
+
+.hover-info {
+  position: absolute;
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  z-index: 9999;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  min-width: 200px;
+  white-space: nowrap;
+  font-size: 1.1em;
+}

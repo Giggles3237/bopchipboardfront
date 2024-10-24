@@ -3,6 +3,17 @@
   --mini-green: #70B62C;
   --white: #ffffff;
   --black: #000000;
+  --chip-background: #ffffff;
+  --chip-text: #000000;
+  --hover-info-background: rgba(255, 255, 255, 0.95);
+  --hover-info-text: #000000;
+}
+
+.night-mode {
+  --chip-background: #2a2a2a;
+  --chip-text: #e0e0e0;
+  --hover-info-background: rgba(42, 42, 42, 0.95);
+  --hover-info-text: #e0e0e0;
 }
 
 .chip {
@@ -10,7 +21,7 @@
   align-items: center;
   justify-content: center;
   height: 40px;
-  width: calc(10% - 10px); /* 10% width with some margin */
+  width: calc(10% - 10px);
   padding: 0 5px;
   margin: 5px;
   cursor: pointer;
@@ -20,6 +31,8 @@
   font-weight: bold;
   font-size: 14px;
   box-sizing: border-box;
+  background-color: var(--chip-background);
+  color: var(--chip-text);
 }
 
 .chip:hover {
@@ -50,6 +63,13 @@
   border: 1px solid var(--black);
 }
 
+.night-mode .chip.new-bmw,
+.night-mode .chip.default {
+  background-color: var(--chip-background);
+  color: var(--chip-text);
+  border-color: var(--chip-text);
+}
+
 .chip.pending {
   transform: rotate(10deg);
 }
@@ -63,8 +83,8 @@
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background-color: var(--white);
-  color: var(--black);
+  background-color: var(--hover-info-background);
+  color: var(--hover-info-text);
   padding: 10px;
   width: 200px;
   z-index: 20;
@@ -75,24 +95,17 @@
   margin: 5px 0;
   font-size: 12px;
 }
-/* Advisor Name Styling */
-.advisor-name {
-  /* Remove or update any existing alignment properties */
-  /* Example: If it was centered before */
-  /* text-align: center; */ /* Remove this line if present */
 
-  /* Add left alignment */
+.advisor-name {
   text-align: left;
-  
-  /* Optional: Add padding or margin for better spacing */
   margin-bottom: 10px;
   font-size: 1.2em;
-  color: #333; /* Adjust color as needed */
+  color: var(--chip-text);
 }
 
 .chips-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  margin: -5px; /* Compensate for chip margins */
+  margin: -5px;
 }
