@@ -21,6 +21,9 @@
   padding: 20px;
   background-color: var(--background-color);
   color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 nav {
@@ -125,4 +128,28 @@ button:hover {
   outline: none;
   border-color: var(--bmw-blue);
   box-shadow: 0 0 5px rgba(6, 83, 182, 0.5);
+}
+
+.footer {
+  margin-top: auto;
+  padding: 20px;
+  text-align: center;
+  font-size: 0.8em;
+  color: var(--text-color);
+  background-color: var(--light-gray);
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.footer-links a {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
 }

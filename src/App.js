@@ -10,6 +10,8 @@ import EditSaleForm from './components/EditSaleForm';
 import DateRangePicker from './components/DateRangePicker';
 import Header from './components/Header';
 import Inbound from './components/Inbound';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 
 const API_BASE_URL = 'https://bopchipboard-c66df77a754d.herokuapp.com/api'; // Update this to match your backend server's address
 
@@ -79,7 +81,7 @@ function App() {
   const handleEditSubmit = useCallback(async (updatedSale) => {
     try {
       console.log('Updating sale:', updatedSale); // Debugging log
-      await axios.put(`${API_BASE_URL}/sales/${updatedSale.id}`, updatedSale); // Use API_BASE_URL for PUT request
+      await axios.put(`${API_BASE_URL}/sales/${updatedSale.id}`, updatedSale);
       await fetchSales(); // Refresh the sales data
       setEditingSale(null);
     } catch (error) {
@@ -204,15 +206,25 @@ function App() {
           } />
           <Route path="/add" element={<AddNewSale />} />
           <Route path="/inbound" element={<Inbound />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
         </Routes>
 
         {editingSale && (
           <EditSaleForm
             sale={editingSale}
-            onSubmit={handleEditSubmit}
-            onCancel={() => setEditingSale(null)}
+            onClose={() => setEditingSale(null)}
+            onSave={handleEditSubmit}
           />
         )}
+
+        {/* Add the footer here, before the closing div */}
+        <footer className="footer">
+          <div className="footer-links">
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms">Terms of Use</Link>
+          </div>
+        </footer>
       </div>
     </Router>
   );
