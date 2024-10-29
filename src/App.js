@@ -49,10 +49,9 @@ function App() {
     fetchSales();
   }, [fetchSales]);
 
-  const handleDateChange = useCallback((start, end) => {
-    console.log('Date range changed:', start, end);
-    setStartDate(start);
-    setEndDate(end);
+  const handleDateChange = useCallback(({ startDate, endDate }) => {
+    setStartDate(startDate);
+    setEndDate(endDate);
   }, []);
 
   const handleSearch = useCallback((event) => {
@@ -157,18 +156,21 @@ function App() {
           <Route path="/" element={
             <>
               <h1>Sales Dashboard</h1>
-              <DateRangePicker
-                startDate={startDate}
-                endDate={endDate}
-                onDateChange={handleDateChange}
-              />
-              <input
-                type="text"
-                placeholder="Search sales..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="search-input"
-              />
+              <div className="search-date-container">
+                <DateRangePicker
+                  startDate={startDate}
+                  endDate={endDate}
+                  onDateChange={handleDateChange}
+                  className="date-picker"
+                />
+                <input
+                  type="text"
+                  placeholder="Search sales..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  className="search-input"
+                />
+              </div>
               {loading ? (
                 <div>Loading sales data...</div>
               ) : filteredSales.length > 0 ? (
@@ -181,18 +183,21 @@ function App() {
           <Route path="/table" element={
             <>
               <h1>Sales Table</h1>
-              <DateRangePicker
-                startDate={startDate}
-                endDate={endDate}
-                onDateChange={handleDateChange}
-              />
-              <input
-                type="text"
-                placeholder="Search sales..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="search-input"
-              />
+              <div className="search-date-container">
+                <input
+                  type="text"
+                  placeholder="Search sales..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  className="search-input"
+                />
+                <DateRangePicker
+                  startDate={startDate}
+                  endDate={endDate}
+                  onDateChange={handleDateChange}
+                  className="date-picker"
+                />
+              </div>
               {loading ? (
                 <div>Loading sales data...</div>
               ) : (
