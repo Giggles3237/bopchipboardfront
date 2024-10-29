@@ -213,8 +213,8 @@ function App() {
         {editingSale && (
           <EditSaleForm
             sale={editingSale}
-            onClose={() => setEditingSale(null)}
-            onSave={handleEditSubmit}
+            onSubmit={handleEditSubmit}
+            onCancel={() => setEditingSale(null)}
           />
         )}
 

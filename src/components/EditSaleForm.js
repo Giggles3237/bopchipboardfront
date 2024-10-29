@@ -43,10 +43,14 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({
-      ...formData,
-      deliveryDate: formData.deliveryDate ? formData.deliveryDate.toISOString() : null
-    });
+    if (typeof onSubmit === 'function') {
+      onSubmit({
+        ...formData,
+        deliveryDate: formData.deliveryDate ? formData.deliveryDate.toISOString() : null
+      });
+    } else {
+      console.error('onSubmit is not a function');
+    }
   };
 
   const vehicleTypes = [
@@ -71,6 +75,8 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
     'Morgan McLane',
     'House'
   ];
+
+  console.log('onSubmit:', onSubmit);
 
   return (
     <div className="edit-sale-form-overlay">

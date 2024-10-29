@@ -35,25 +35,34 @@ function ChipTable({ sales, onEdit }) {
   const calculateTotals = () => {
     return sales.reduce(
       (acc, sale) => {
-        // Determine the sale type and initialize if not present
         if (sale.type === 'New BMW') {
           acc.whiteBMW.delivered += isDelivered(sale.delivered) ? 1 : 0;
           acc.whiteBMW.pending += !isDelivered(sale.delivered) ? 1 : 0;
         } else if (sale.type === 'New MINI') {
           acc.greenMINI.delivered += isDelivered(sale.delivered) ? 1 : 0;
           acc.greenMINI.pending += !isDelivered(sale.delivered) ? 1 : 0;
-        } else if (
-          ['CPO BMW', 'CPO MINI', 'Used BMW', 'Used MINI'].includes(sale.type)
-        ) {
-          acc.blueUsed.delivered += isDelivered(sale.delivered) ? 1 : 0;
-          acc.blueUsed.pending += !isDelivered(sale.delivered) ? 1 : 0;
+        } else if (sale.type === 'CPO BMW') {
+          acc.cpoBMW.delivered += isDelivered(sale.delivered) ? 1 : 0;
+          acc.cpoBMW.pending += !isDelivered(sale.delivered) ? 1 : 0;
+        } else if (sale.type === 'CPO MINI') {
+          acc.cpoMINI.delivered += isDelivered(sale.delivered) ? 1 : 0;
+          acc.cpoMINI.pending += !isDelivered(sale.delivered) ? 1 : 0;
+        } else if (sale.type === 'Used BMW') {
+          acc.usedBMW.delivered += isDelivered(sale.delivered) ? 1 : 0;
+          acc.usedBMW.pending += !isDelivered(sale.delivered) ? 1 : 0;
+        } else if (sale.type === 'Used MINI') {
+          acc.usedMINI.delivered += isDelivered(sale.delivered) ? 1 : 0;
+          acc.usedMINI.pending += !isDelivered(sale.delivered) ? 1 : 0;
         }
         return acc;
       },
       {
         whiteBMW: { delivered: 0, pending: 0 },
         greenMINI: { delivered: 0, pending: 0 },
-        blueUsed: { delivered: 0, pending: 0 },
+        cpoBMW: { delivered: 0, pending: 0 },
+        cpoMINI: { delivered: 0, pending: 0 },
+        usedBMW: { delivered: 0, pending: 0 },
+        usedMINI: { delivered: 0, pending: 0 },
       }
     );
   };
@@ -110,14 +119,30 @@ function ChipTable({ sales, onEdit }) {
     <div className="chip-table">
       {/* Totals Container */}
       <div className="totals-container">
-        <div className="total-item white-bmw">
-          <span className="sale-type-label">New BMW:</span> {totals.whiteBMW.delivered} ({totals.whiteBMW.pending})
+        <div className="totals-left">
+          <div className="total-item white-bmw">
+            <span className="sale-type-label">New BMW:</span> {totals.whiteBMW.delivered} ({totals.whiteBMW.pending})
+          </div>
+          <div className="total-item green-mini">
+            <span className="sale-type-label">New MINI:</span> {totals.greenMINI.delivered} ({totals.greenMINI.pending})
+          </div>
+          <div className="total-item blue-used">
+            <span className="sale-type-label">Used:</span> {totals.usedBMW.delivered + totals.usedMINI.delivered} ({totals.usedBMW.pending + totals.usedMINI.pending})
+          </div>
         </div>
-        <div className="total-item green-mini">
-          <span className="sale-type-label">New MINI:</span> {totals.greenMINI.delivered} ({totals.greenMINI.pending})
-        </div>
-        <div className="total-item blue-used">
-          <span className="sale-type-label">Used:</span> {totals.blueUsed.delivered} ({totals.blueUsed.pending})
+        <div className="totals-right">
+          <div className="total-item cpo-bmw">
+            <span className="sale-type-label">CPO BMW:</span> {totals.cpoBMW.delivered} ({totals.cpoBMW.pending})
+          </div>
+          <div className="total-item cpo-mini">
+            <span className="sale-type-label">CPO MINI:</span> {totals.cpoMINI.delivered} ({totals.cpoMINI.pending})
+          </div>
+          <div className="total-item used-bmw">
+            <span className="sale-type-label">Used BMW:</span> {totals.usedBMW.delivered} ({totals.usedBMW.pending})
+          </div>
+          <div className="total-item used-mini">
+            <span className="sale-type-label">Used MINI:</span> {totals.usedMINI.delivered} ({totals.usedMINI.pending})
+          </div>
         </div>
       </div>
 
