@@ -1,19 +1,27 @@
 .date-range-picker {
   display: flex;
+  align-items: center;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 20px;
+  margin: 20px auto;
+}
+
+.date-picker-container {
+  display: flex;
+  gap: 20px;
+  align-items: center;
 }
 
 .date-picker-wrapper {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  gap: 10px;
 }
 
 .date-picker-wrapper label {
   font-size: 14px;
   color: var(--text-color);
+  white-space: nowrap;
 }
 
 .react-datepicker-wrapper {
@@ -25,7 +33,7 @@
 }
 
 .react-datepicker__input-container input {
-  padding: 8px 12px;
+  padding: 4px 8px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 14px;
