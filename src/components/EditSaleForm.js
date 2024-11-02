@@ -179,10 +179,29 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
             <DatePicker
               selected={formData.deliveryDate}
               onChange={handleDateChange}
-              dateFormat="yyyy/MM/dd"
+              dateFormat="MM/dd/yyyy"
               id="deliveryDate"
               name="deliveryDate"
               required
+              showMonthDropdown
+              showYearDropdown
+              dropdownMode="select"
+              popperPlacement="bottom-start"
+              popperModifiers={[
+                {
+                  name: "offset",
+                  options: {
+                    offset: [0, 10],
+                  },
+                },
+                {
+                  name: "preventOverflow",
+                  options: {
+                    boundary: "viewport",
+                    padding: 20,
+                  },
+                },
+              ]}
             />
           </div>
           <div>

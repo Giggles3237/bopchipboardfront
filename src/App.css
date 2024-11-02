@@ -159,7 +159,7 @@ button:hover {
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background-color: #f0f0f0;
+  background-color: var(--light-gray);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
@@ -170,9 +170,11 @@ button:hover {
   flex: 1;
   min-width: 200px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 16px;
+  background-color: var(--background-color);
+  color: var(--text-color);
   transition: border-color 0.3s ease;
 }
 
@@ -192,9 +194,11 @@ button:hover {
 .date-picker input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 16px;
+  background-color: var(--background-color);
+  color: var(--text-color);
   transition: border-color 0.3s ease;
 }
 

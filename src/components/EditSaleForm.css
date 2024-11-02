@@ -7,6 +7,7 @@
   --border-color: #cccccc;
   --background-color: #ffffff;
   --text-color: #333333;
+  --hover-background: #e0e0e0;
 }
 
 .night-mode {
@@ -16,6 +17,7 @@
   --border-color: #555555;
   --background-color: #1e1e1e;
   --text-color: #e0e0e0;
+  --hover-background: #3a3a3a;
 }
 
 .edit-sale-form-overlay {
@@ -33,11 +35,14 @@
 
 .edit-sale-form {
   background-color: var(--background-color);
-  padding: 30px;
+  padding: 20px;
   border-radius: 8px;
   width: 90%;
-  max-width: 500px;
+  max-width: 400px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: auto;
+  position: relative;
+  box-sizing: border-box;
 }
 
 .edit-sale-form h2 {
@@ -49,6 +54,12 @@
 .edit-sale-form form {
   display: grid;
   gap: 15px;
+  width: 100%;
+}
+
+.edit-sale-form form > div {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .edit-sale-form label {
@@ -58,7 +69,8 @@
 
 .edit-sale-form input[type="text"],
 .edit-sale-form input[type="number"],
-.edit-sale-form select {
+.edit-sale-form select,
+.react-datepicker-wrapper {
   width: 100%;
   padding: 8px;
   border: 1px solid var(--border-color);
@@ -66,6 +78,7 @@
   font-size: 14px;
   background-color: var(--background-color);
   color: var(--text-color);
+  box-sizing: border-box;
 }
 
 .edit-sale-form input[type="checkbox"] {
@@ -102,7 +115,7 @@
 }
 
 .form-buttons button[type="button"]:hover {
-  background-color: #e0e0e0;
+  background-color: var(--hover-background);
 }
 
 .night-mode .form-buttons button[type="button"] {
@@ -115,11 +128,13 @@
 }
 
 .react-datepicker-wrapper {
+  display: block;
   width: 100%;
 }
 
 .react-datepicker__input-container {
   display: block;
+  width: 100%;
 }
 
 .react-datepicker__input-container input {
@@ -171,4 +186,34 @@
 
 .night-mode .react-datepicker__day:hover {
   background-color: var(--light-gray);
+}
+
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}
+
+.react-datepicker-wrapper {
+  display: block;
+  width: 100%;
+}
+
+.react-datepicker__input-container {
+  display: block;
+  width: 100%;
+}
+
+.react-datepicker {
+  font-family: inherit;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--background-color);
+}
+
+.react-datepicker__triangle {
+  display: none;
+}
+
+.react-datepicker__month-dropdown-container,
+.react-datepicker__year-dropdown-container {
+  margin: 0 5px;
 }

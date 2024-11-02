@@ -29,6 +29,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingSale, setEditingSale] = useState(null);
+  const [ignoreDateRange, setIgnoreDateRange] = useState(false);
 
   const fetchSales = useCallback(async () => {
     try {
@@ -49,10 +50,11 @@ function App() {
     fetchSales();
   }, [fetchSales]);
 
-  const handleDateChange = useCallback(({ startDate, endDate }) => {
+  const handleDateChange = ({ startDate, endDate, ignoreDate }) => {
     setStartDate(startDate);
     setEndDate(endDate);
-  }, []);
+    setIgnoreDateRange(ignoreDate);
+  };
 
   const handleSearch = useCallback((event) => {
     setSearchTerm(event.target.value);
@@ -60,22 +62,17 @@ function App() {
 
   const filteredSales = useMemo(() => {
     return sales.filter(sale => {
-      if (!sale) return false;
-      
       const saleDate = new Date(sale.deliveryDate);
-      saleDate.setHours(0, 0, 0, 0); // Reset time to midnight for accurate date comparison
-
-      const dateMatch = 
-        (!startDate || saleDate >= startDate) && 
-        (!endDate || saleDate <= endDate);
-
+      const dateMatch = ignoreDateRange || 
+        ((!startDate || saleDate >= startDate) && (!endDate || saleDate <= endDate));
+      
       const searchMatch = Object.values(sale).some(value => 
         value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
       );
 
       return dateMatch && searchMatch;
     });
-  }, [sales, startDate, endDate, searchTerm]);
+  }, [sales, startDate, endDate, ignoreDateRange, searchTerm]);
 
   const handleEditSubmit = useCallback(async (updatedSale) => {
     try {
