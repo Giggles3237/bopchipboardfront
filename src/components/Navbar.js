@@ -1,12 +1,12 @@
-import React, { useContext } from 'react';
+import React from 'react';
+import { Container, Navbar, Nav } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { Navbar, Nav, Container } from 'react-bootstrap';
-import { AuthContext } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from './ThemeToggle';
-import './Header.css';
+import './Navbar.css';
 
-function Header({ isDarkMode, onToggleTheme }) {
-  const { auth, logout } = useContext(AuthContext);
+const NavbarComponent = ({ isDarkMode, onToggleTheme }) => {
+  const { auth, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -18,12 +18,11 @@ function Header({ isDarkMode, onToggleTheme }) {
     <Navbar bg="light" expand="lg" className="mb-3">
       <Container>
         <Navbar.Brand as={Link} to="/">
-          <img 
-            src="/assets/images/logo.png"
-            alt="BOP Chips Logo"
-            className="header-logo"
+          <img
+            src="/logo512.png"
+            alt="BOP Logo"
+            className="navbar-logo"
           />
-          BOP Chipboard
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
@@ -32,14 +31,9 @@ function Header({ isDarkMode, onToggleTheme }) {
             {auth?.user?.role === 'Admin' && (
               <Nav.Link as={Link} to="/admin">Admin Dashboard</Nav.Link>
             )}
-            {auth?.user?.role === 'Manager' && (
-              <Nav.Link as={Link} to="/manager">Manager Dashboard</Nav.Link>
-            )}
-            {auth?.user?.role === 'Salesperson' && (
-              <Nav.Link as={Link} to="/salesperson">Sales Dashboard</Nav.Link>
-            )}
           </Nav>
           <Nav>
+            <ThemeToggle isDarkMode={isDarkMode} onToggle={onToggleTheme} />
             {!auth?.user ? (
               <>
                 <Nav.Link as={Link} to="/login">Login</Nav.Link>
@@ -52,7 +46,6 @@ function Header({ isDarkMode, onToggleTheme }) {
                   Logged in as: {auth.user.email} ({auth.user.role})
                 </Navbar.Text>
                 <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
-                <ThemeToggle isDarkMode={isDarkMode} onToggle={onToggleTheme} />
               </>
             )}
           </Nav>
@@ -60,6 +53,6 @@ function Header({ isDarkMode, onToggleTheme }) {
       </Container>
     </Navbar>
   );
-}
+};
 
-export default Header;
+export default NavbarComponent; 

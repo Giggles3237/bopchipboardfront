@@ -1,176 +1,169 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Chip from './Chip';
 import './ChipTable.css';
+import { AuthContext } from '../contexts/AuthContext';
+import Totals from './Totals';
 
 /**
  * ChipTable Component
  * 
- * Displays a table of sales chips grouped by advisors with totals for each sale type.
- * Totals at the top show Delivered cars followed by Pending in parentheses.
- * 
- * @param {Array} sales - Array of sale objects.
- * @param {Function} onEdit - Function to handle editing a sale.
+ * This component displays a table of sales chips, grouped and sorted by advisors.
+ * It provides functionalities to edit sales based on user roles and displays
+ * aggregated sales data for managers and administrators.
+ *
+ * @param {Array} sales - An array of sales objects to be displayed.
+ * @param {Function} onEdit - Callback function to handle editing of a sale.
  */
-function ChipTable({ sales, onEdit }) {
-  /**
-   * Determines if a sale is delivered based on various possible values.
-   * 
-   * @param {any} delivered - The delivered status of the sale.
-   * @returns {boolean} - Returns true if the sale is delivered, else false.
-   */
-  const isDelivered = (delivered) => {
-    return (
-      delivered === '1' ||
-      delivered === 1 ||
-      delivered === true ||
-      delivered === 'Yes'
-    );
-  };
+function ChipTable({ sales = [], onEdit }) {
+  // Accessing authentication information from AuthContext
+  const { auth } = useContext(AuthContext);
 
-  /**
-   * Calculates the totals for each sale type, divided into Delivered and Pending.
-   * 
-   * @returns {Object} An object containing totals for each sale type with Delivered and Pending counts.
-   */
-  const calculateTotals = () => {
-    return sales.reduce(
-      (acc, sale) => {
-        if (sale.type === 'New BMW') {
-          acc.whiteBMW.delivered += isDelivered(sale.delivered) ? 1 : 0;
-          acc.whiteBMW.pending += !isDelivered(sale.delivered) ? 1 : 0;
-        } else if (sale.type === 'New MINI') {
-          acc.greenMINI.delivered += isDelivered(sale.delivered) ? 1 : 0;
-          acc.greenMINI.pending += !isDelivered(sale.delivered) ? 1 : 0;
-        } else if (sale.type === 'CPO BMW') {
-          acc.cpoBMW.delivered += isDelivered(sale.delivered) ? 1 : 0;
-          acc.cpoBMW.pending += !isDelivered(sale.delivered) ? 1 : 0;
-        } else if (sale.type === 'CPO MINI') {
-          acc.cpoMINI.delivered += isDelivered(sale.delivered) ? 1 : 0;
-          acc.cpoMINI.pending += !isDelivered(sale.delivered) ? 1 : 0;
-        } else if (sale.type === 'Used BMW') {
-          acc.usedBMW.delivered += isDelivered(sale.delivered) ? 1 : 0;
-          acc.usedBMW.pending += !isDelivered(sale.delivered) ? 1 : 0;
-        } else if (sale.type === 'Used MINI') {
-          acc.usedMINI.delivered += isDelivered(sale.delivered) ? 1 : 0;
-          acc.usedMINI.pending += !isDelivered(sale.delivered) ? 1 : 0;
-        }
-        return acc;
-      },
-      {
-        whiteBMW: { delivered: 0, pending: 0 },
-        greenMINI: { delivered: 0, pending: 0 },
-        cpoBMW: { delivered: 0, pending: 0 },
-        cpoMINI: { delivered: 0, pending: 0 },
-        usedBMW: { delivered: 0, pending: 0 },
-        usedMINI: { delivered: 0, pending: 0 },
-      }
-    );
-  };
+  // Determining if the current user has managerial or administrative privileges
+  const isManagerOrAdmin = auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager';
 
-  const totals = calculateTotals();
+  // Debugging information: total sales, unique advisors, current user's role and name
+  console.log('ChipTable Debug:', {
+    totalSales: sales.length,
+    uniqueAdvisors: [...new Set(sales.map(sale => sale.advisor))],
+    currentUserRole: auth?.user?.role,
+    currentUserName: auth?.user?.name
+  });
 
-  /**
-   * Groups sales by advisor and counts delivered and pending sales.
-   * 
-   * @type {Object}
-   */
-  const groupedSales = sales.reduce((acc, sale) => {
-    if (!acc[sale.advisor]) {
-      acc[sale.advisor] = { delivered: 0, pending: 0, sales: [] };
-    }
-
-    // Increment delivered or pending based on sale status
-    if (isDelivered(sale.delivered)) {
-      acc[sale.advisor].delivered++;
-    } else {
-      acc[sale.advisor].pending++;
-    }
-
-    acc[sale.advisor].sales.push(sale);
-    return acc;
-  }, {});
-
-  /**
-   * Sorts advisors first by the number of delivered sales, then by pending sales.
-   * 
-   * @type {Array}
-   */
-  const sortedAdvisors = Object.entries(groupedSales).sort((a, b) => {
-    if (b[1].delivered !== a[1].delivered) {
-      return b[1].delivered - a[1].delivered;
-    } else {
-      return b[1].pending - a[1].pending;
-    }
+  // Additional render-time debugging info: sales count, first sale, and user role
+  console.log('ChipTable render:', {
+    salesCount: sales?.length,
+    firstSale: sales?.[0],
+    authRole: auth?.user?.role
   });
 
   /**
-   * Formats the advisor's name to a shorter version, e.g., "John D."
+   * Determines if the current user can edit a specific sale.
    * 
-   * @param {string} advisor - The full name of the advisor.
-   * @returns {string} The formatted advisor name.
+   * Admins and Managers can edit any sale.
+   * Salespeople can only edit their own sales.
+   *
+   * @param {Object} sale - The sale object to check permissions for.
+   * @returns {boolean} - True if the user can edit the sale, otherwise false.
    */
-  const formatAdvisorName = (advisor) => {
-    const parts = advisor.trim().split(' ');
-    if (parts.length === 1) return parts[0];
-    return `${parts[0]} ${parts[1].charAt(0)}.`;
+  const canEditSale = (sale) => {
+    const userRole = auth?.user?.role;
+    // Admins and Managers can edit any sale
+    if (userRole === 'Admin' || userRole === 'Manager') {
+      return true;
+    }
+    // Salespeople can only edit their own sales
+    return sale.advisor === auth?.user?.name;
+  };
+
+  /**
+   * Aggregates sales data per advisor, counting total and delivered sales.
+   * 
+   * @returns {Object} - An object mapping advisor names to their sales statistics.
+   */
+  const getAdvisorStats = () => {
+    return sales.reduce((acc, sale) => {
+      const advisor = sale.advisor || 'Unassigned';
+      if (!acc[advisor]) {
+        acc[advisor] = { total: 0, delivered: 0 };
+      }
+      acc[advisor].total += 1;
+      if (sale.delivered) {
+        acc[advisor].delivered += 1;
+      }
+      return acc;
+    }, {});
+  };
+
+  /**
+   * Formats advisor information with their delivered and pending sales statistics.
+   *
+   * @param {string} advisor - The name of the advisor.
+   * @returns {Object} - An object containing the advisor's name, delivered, and pending sales.
+   */
+  const formatAdvisorWithStats = (advisor) => {
+    const stats = getAdvisorStats();
+    const delivered = stats[advisor].delivered;
+    const pending = stats[advisor].total - delivered;
+    return {
+      name: advisor,
+      delivered: delivered,
+      pending: pending
+    };
+  };
+
+  // Creating a sorted list of advisors based on their delivered and total sales
+  const sortedAdvisors = [...new Set(sales.map(sale => sale.advisor || 'Unassigned'))]
+    .filter(advisor => advisor !== 'Unassigned')  // Excluding 'Unassigned' advisors
+    .sort((a, b) => {
+      const stats = getAdvisorStats();
+      // Sort by number of delivered sales in descending order
+      if (stats[b].delivered !== stats[a].delivered) {
+        return stats[b].delivered - stats[a].delivered;
+      }
+      // If delivered sales are equal, sort by total sales in descending order
+      if (stats[b].total !== stats[a].total) {
+        return stats[b].total - stats[a].total;
+      }
+      // If both delivered and total sales are equal, sort alphabetically
+      return a.localeCompare(b);
+    })
+    .map(advisor => formatAdvisorWithStats(advisor));
+
+  /**
+   * Handler function for editing a sale.
+   * 
+   * Checks if the user has permission to edit the sale and invokes the onEdit callback.
+   * If the user lacks permission, an alert is shown.
+   *
+   * @param {Object} sale - The sale object to be edited.
+   */
+  const handleEdit = (sale) => {
+    if (canEditSale(sale)) {
+      onEdit(sale);
+    } else {
+      alert('You can only edit your own sales.');
+    }
   };
 
   return (
     <div className="chip-table">
-      {/* Totals Container */}
-      <div className="totals-container">
-        <div className="totals-left">
-          <div className="total-item white-bmw">
-            <span className="sale-type-label">New BMW:</span> {totals.whiteBMW.delivered} ({totals.whiteBMW.pending})
+      {/* Display Totals component if user is Manager or Admin */}
+      {isManagerOrAdmin && <Totals sales={sales} />}
+      
+      {/* Iterate over sorted advisors to display their sales chips */}
+      {sortedAdvisors.map(({ name, delivered, pending }) => (
+        <div key={name} className="advisor-section">
+          <div className="advisor-name">
+            <h3>
+              {name}
+              <div className="advisor-stats">
+                <span className="delivered">{delivered}</span>
+                <span className="pending">({pending})</span>
+              </div>
+            </h3>
           </div>
-          <div className="total-item green-mini">
-            <span className="sale-type-label">New MINI:</span> {totals.greenMINI.delivered} ({totals.greenMINI.pending})
-          </div>
-          <div className="total-item blue-used">
-            <span className="sale-type-label">Used:</span> {totals.usedBMW.delivered + totals.usedMINI.delivered} ({totals.usedBMW.pending + totals.usedMINI.pending})
-          </div>
-        </div>
-        <div className="totals-right">
-          <div className="total-item cpo-bmw">
-            <span className="sale-type-label">CPO BMW:</span> {totals.cpoBMW.delivered} ({totals.cpoBMW.pending})
-          </div>
-          <div className="total-item cpo-mini">
-            <span className="sale-type-label">CPO MINI:</span> {totals.cpoMINI.delivered} ({totals.cpoMINI.pending})
-          </div>
-          <div className="total-item used-bmw">
-            <span className="sale-type-label">Used BMW:</span> {totals.usedBMW.delivered} ({totals.usedBMW.pending})
-          </div>
-          <div className="total-item used-mini">
-            <span className="sale-type-label">Used MINI:</span> {totals.usedMINI.delivered} ({totals.usedMINI.pending})
-          </div>
-        </div>
-      </div>
-
-      {/* Advisor Groups */}
-      {sortedAdvisors.map(([advisor, data]) => {
-        // Sort sales within each advisor group
-        const sortedSales = [...data.sales].sort((a, b) => {
-          // Sort by delivered status: delivered first
-          if (isDelivered(b.delivered) !== isDelivered(a.delivered)) {
-            return isDelivered(b.delivered) - isDelivered(a.delivered);
-          }
-          // Then sort by deliveryDate: earlier dates first
-          return new Date(a.deliveryDate) - new Date(b.deliveryDate);
-        });
-
-        return (
-          <div key={advisor} className="advisor-group">
-            <h2 className="advisor-name">
-              {`${formatAdvisorName(advisor)} ${data.delivered} (${data.pending})`}
-            </h2>
-            <div className="chips-container">
-              {sortedSales.map((sale) => (
-                <Chip key={sale.id} sale={sale} onEdit={onEdit} />
+          <div className="chips">
+            {sales
+              .filter(sale => sale.advisor === name)
+              .sort((a, b) => {
+                // First, sort by delivery status: delivered sales come first
+                if (a.delivered !== b.delivered) {
+                  return a.delivered ? -1 : 1;  // Delivered sales first
+                }
+                // Then, sort by delivery date in descending order within each group
+                return new Date(b.deliveryDate) - new Date(a.deliveryDate);
+              })
+              .map(sale => (
+                <Chip 
+                  key={sale.id} 
+                  sale={sale} 
+                  onEdit={handleEdit}
+                  isEditable={canEditSale(sale)}
+                />
               ))}
-            </div>
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }

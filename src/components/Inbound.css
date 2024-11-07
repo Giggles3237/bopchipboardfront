@@ -1,84 +1,96 @@
+/* Styles for the Inbound component */
+
+/* Root variables for light mode */
 :root {
-  --background-color: #ffffff;
-  --text-color: #333333;
-  --border-color: #ccc;
-  --header-background: #f0f0f0;
-  --cell-background: #f0f0f0;
-  --hover-background: #e0e0e0;
+  --background-color: #ffffff;    /* Background color of the container */
+  --text-color: #333333;          /* Primary text color */
+  --border-color: #ccc;           /* Border color for grid and cells */
+  --header-background: #f0f0f0;   /* Background color for headers */
+  --cell-background: #f0f0f0;     /* Background color for individual cells */
+  --hover-background: #e0e0e0;    /* Background color on hover */
 }
 
+/* Variables override for night mode */
 .night-mode {
-  --background-color: #121212;
-  --text-color: #e0e0e0;
-  --border-color: #555555;
-  --header-background: #2a2a2a;
-  --cell-background: #1e1e1e;
-  --hover-background: #2a3f50;
+  --background-color: #121212;    /* Dark background color */
+  --text-color: #e0e0e0;          /* Light text color for dark mode */
+  --border-color: #555555;        /* Darker border color */
+  --header-background: #2a2a2a;   /* Dark header background */
+  --cell-background: #1e1e1e;     /* Dark cell background */
+  --hover-background: #2a3f50;    /* Enhanced hover background for dark mode */
 }
 
+/* Container styling */
 .inbound-container {
-  padding: 20px;
-  background-color: var(--background-color);
-  color: var(--text-color);
+  padding: 20px;                                   /* Inner spacing */
+  background-color: var(--background-color);       /* Dynamic background color */
+  color: var(--text-color);                       /* Dynamic text color */
 }
 
+/* Grid layout for organizing sales */
 .inbound-grid {
-  display: grid;
-  grid-template-columns: auto repeat(4, 1fr);
-  gap: 1px;
-  background-color: var(--border-color);
-  border: 1px solid var(--border-color);
+  display: grid;                                   /* Use CSS Grid for layout */
+  grid-template-columns: auto repeat(4, 1fr);      /* Define columns: one auto and four equal */
+  gap: 1px;                                        /* Gap between grid items */
+  background-color: var(--border-color);           /* Background color of the grid */
+  border: 1px solid var(--border-color);           /* Border around the grid */
 }
 
+/* Ensures that header and advisor rows adopt grid's layout */
 .header-row, .advisor-row {
-  display: contents;
+  display: contents; /* Allows child elements to span grid areas */
 }
 
+/* Styling for headers and advisor names */
 .consultant-header, .month-header, .advisor-name, .month-cell {
-  background-color: var(--header-background);
-  padding: 10px;
-  display: flex;
-  align-items: center;
+  background-color: var(--header-background); /* Background for these elements */
+  padding: 10px;                              /* Inner spacing */
+  display: flex;                              /* Use Flexbox for alignment */
+  align-items: center;                        /* Vertically center items */
 }
 
+/* Specific styling for consultant and month headers */
 .consultant-header, .month-header {
-  font-weight: bold;
-  justify-content: center;
-  background-color: var(--header-background);
+  font-weight: bold;                          /* Bold text for emphasis */
+  justify-content: center;                    /* Center content horizontally */
 }
 
+/* Styling for advisor names */
 .advisor-name {
-  font-weight: bold;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: bold;                          /* Bold text */
+  white-space: nowrap;                        /* Prevent text from wrapping */
+  overflow: hidden;                           /* Hide overflow text */
+  text-overflow: ellipsis;                    /* Show ellipsis for overflow */
 }
 
+/* Styling for each month cell */
 .month-cell {
-  flex-wrap: wrap;
-  gap: 5px;
-  align-content: flex-start;
-  min-height: 40px;
-  background-color: var(--cell-background);
+  flex-wrap: wrap;                            /* Allow items to wrap within the cell */
+  gap: 5px;                                   /* Gap between items */
+  align-content: flex-start;                  /* Align items to the start */
+  min-height: 40px;                           /* Minimum height for the cell */
+  background-color: var(--cell-background);   /* Dynamic background color */
 }
 
-h1 {
-  color: var(--text-color);
-  margin-bottom: 20px;
+/* Styling for h1 elements if present */
+.h1 {
+  color: var(--text-color);                   /* Dynamic text color */
+  margin-bottom: 20px;                        /* Space below the element */
 }
 
+/* Tooltip styling for hover information */
 .hover-info {
-  position: absolute;
-  background-color: var(--background-color);
-  border: 1px solid var(--border-color);
-  padding: 10px;
-  z-index: 9999;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  min-width: 200px;
-  white-space: nowrap;
-  font-size: 1.1em;
+  position: absolute;                          /* Position relative to the nearest positioned ancestor */
+  background-color: var(--background-color);   /* Dynamic background color */
+  border: 1px solid var(--border-color);       /* Border styling */
+  padding: 10px;                               /* Inner padding */
+  z-index: 9999;                               /* Ensure tooltip appears above other elements */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);       /* Subtle shadow for depth */
+  top: 100%;                                   /* Position below the triggering element */
+  left: 50%;                                   /* Center horizontally */
+  transform: translateX(-50%);                 /* Adjust position to center */
+  width: max-content;                           /* Width based on content */
+  min-width: 200px;                             /* Minimum width */
+  white-space: nowrap;                          /* Prevent text wrapping */
+  font-size: 1.1em;                             /* Slightly larger font size */
 }

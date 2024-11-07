@@ -1,30 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './EditSaleForm.css';
+import { AuthContext } from '../contexts/AuthContext';
+import axios from 'axios';
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
 function EditSaleForm({ sale, onSubmit, onCancel }) {
+  const { auth } = useContext(AuthContext);
+  const [salespeople, setSalespeople] = useState([]);
+
+  // Add useEffect to fetch salespeople
+  useEffect(() => {
+    const fetchSalespeople = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/users/salespeople-and-managers`, {
+          headers: {
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+        setSalespeople(response.data);
+      } catch (error) {
+        console.error('Error fetching salespeople:', error);
+      }
+    };
+
+    fetchSalespeople();
+  }, [auth.token]);
+
   const [formData, setFormData] = useState({
-    clientName: '',
-    stockNumber: '',
-    year: '',
-    make: '',
-    model: '',
-    color: '',
-    advisor: '',
-    delivered: false,
-    deliveryDate: null,
-    type: ''
+    ...sale,
+    deliveryDate: sale.deliveryDate instanceof Date 
+      ? sale.deliveryDate.toISOString().split('T')[0]
+      : new Date(sale.deliveryDate).toISOString().split('T')[0],
+    advisor: sale.advisor || (auth?.user?.role === 'Salesperson' ? auth.user.name : '')
   });
 
+  // Add console logs to debug
+  console.log('Auth state:', auth);
+  console.log('Current sale:', sale);
+
   useEffect(() => {
-    if (sale) {
-      setFormData({
-        ...sale,
-        deliveryDate: sale.deliveryDate ? new Date(sale.deliveryDate) : null
-      });
+    // Check if we're authenticated
+    if (!auth?.token) {
+      console.error('No authentication token found');
+      // Optionally redirect to login
+      // window.location.href = '/login';
     }
-  }, [sale]);
+  }, [auth]);
+
+  // Add validation check at the start of component
+  useEffect(() => {
+    if (auth?.user?.role === 'Salesperson' && sale.advisor && sale.advisor !== auth.user.name) {
+      alert('You can only edit your own sales.');
+      onCancel();
+    }
+  }, [auth, sale, onCancel]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -41,16 +73,47 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (typeof onSubmit === 'function') {
-      onSubmit({
-        ...formData,
-        deliveryDate: formData.deliveryDate ? formData.deliveryDate.toISOString() : null
-      });
-    } else {
-      console.error('onSubmit is not a function');
+    console.log('Starting form submission');
+    
+    // Add validation check before submission
+    if (auth?.user?.role === 'Salesperson' && sale.advisor && sale.advisor !== auth.user.name) {
+      alert('You can only edit your own sales.');
+      return;
     }
+    
+    try {
+      // Format the date as YYYY-MM-DD
+      const formattedDate = formData.deliveryDate instanceof Date 
+        ? formData.deliveryDate.toISOString().split('T')[0]
+        : new Date(formData.deliveryDate).toISOString().split('T')[0];
+
+      const submissionData = {
+        ...formData,
+        deliveryDate: formattedDate,
+        delivered: Boolean(formData.delivered)
+      };
+      
+      console.log('Submission data prepared:', submissionData);
+      console.log('Calling onSubmit...');
+      
+      await onSubmit(submissionData);
+      console.log('Submit successful, calling onCancel');
+      onCancel();
+      
+      // Force page refresh after successful submission
+      window.location.reload();
+      
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
+      alert(`Error saving changes: ${error.message}`);
+    }
+  };
+
+  const handleCancel = () => {
+    console.log('Cancel clicked');
+    onCancel();
   };
 
   const vehicleTypes = [
@@ -62,26 +125,12 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
     'Used MINI'
   ];
 
-  const advisors = [
-    'Brayden Wild',
-    'Dave Dzambo',
-    'Ed Mathieu',
-    'Evan Cambest',
-    'Gregg Lewis',
-    'Kyle Behrend',
-    'Laurene Willis',
-    'Mark Entress',
-    'Mike Diaz',
-    'Morgan McLane',
-    'House'
-  ];
-
   console.log('onSubmit:', onSubmit);
 
   return (
     <div className="edit-sale-form-overlay">
       <div className="edit-sale-form">
-        <h2>{sale ? 'Edit Sale' : 'Add New Sale'}</h2>
+        <h2>{sale.id ? 'Edit Sale' : 'Add New Sale'}</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <label htmlFor="clientName">Client Name:</label>
@@ -154,14 +203,23 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
             <select
               id="advisor"
               name="advisor"
-              value={formData.advisor}
+              value={formData.advisor || ''}
               onChange={handleChange}
               required
             >
               <option value="">Select Advisor</option>
-              {advisors.map((advisor, index) => (
-                <option key={index} value={advisor}>{advisor}</option>
-              ))}
+              {auth?.user?.role === 'Salesperson' ? (
+                <option value={auth.user.name}>{auth.user.name}</option>
+              ) : (
+                <>
+                  {salespeople.map(person => (
+                    <option key={person.id} value={person.name}>
+                      {person.name} ({person.role})
+                    </option>
+                  ))}
+                  <option value="House">House</option>
+                </>
+              )}
             </select>
           </div>
           <div>
@@ -177,31 +235,12 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
           <div>
             <label htmlFor="deliveryDate">Delivery Date:</label>
             <DatePicker
-              selected={formData.deliveryDate}
+              selected={formData.deliveryDate instanceof Date ? formData.deliveryDate : new Date(formData.deliveryDate)}
               onChange={handleDateChange}
-              dateFormat="MM/dd/yyyy"
+              dateFormat="yyyy-MM-dd"
               id="deliveryDate"
               name="deliveryDate"
               required
-              showMonthDropdown
-              showYearDropdown
-              dropdownMode="select"
-              popperPlacement="bottom-start"
-              popperModifiers={[
-                {
-                  name: "offset",
-                  options: {
-                    offset: [0, 10],
-                  },
-                },
-                {
-                  name: "preventOverflow",
-                  options: {
-                    boundary: "viewport",
-                    padding: 20,
-                  },
-                },
-              ]}
             />
           </div>
           <div>
@@ -220,8 +259,8 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
             </select>
           </div>
           <div className="form-buttons">
-            <button type="submit">{sale ? 'Save Changes' : 'Add Sale'}</button>
-            <button type="button" onClick={onCancel}>Cancel</button>
+            <button type="submit">Save Changes</button>
+            <button type="button" onClick={handleCancel}>Cancel</button>
           </div>
         </form>
       </div>

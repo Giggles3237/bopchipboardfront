@@ -1,80 +1,116 @@
-/* General Chip Styles */
-.chip {
-  background-color: #f0f0f0;
-  padding: 10px;
-  margin: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth transition */
-  cursor: pointer;
-  width: 150px;
-  opacity: 1;
+/* Base Chip Styles */
+.chip-component {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  padding: 1px 2px;
   position: relative;
-  border-radius: 0px; /* No rounded corners */
-  border: none; /* No border */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  border-radius: 0;
+  user-select: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  width: calc(10% - 15px);
+  box-sizing: border-box;
 }
 
-/* Delivered Units - No tilt */
-.chip.delivered {
-  transform: rotate(0deg); /* No tilt for delivered cars */
-  opacity: 1; /* Fully opaque */
+/* Chip Types with specific colors */
+.chip-component.new-bmw {
+  background-color: white;
+  color: var(--bmw-blue);
+  border: 1px solid var(--bmw-blue);
 }
 
-/* Pending Units - Tilted */
-.chip.pending {
-  transform: rotate(10deg); /* Tilt for pending units */
-  opacity: 0.7; /* Optional: Slight transparency for pending units */
+.chip-component.new-mini {
+  background-color: var(--mini-green);
+  color: white;
 }
 
-/* Hover Effect */
-.chip:hover {
-  transform: rotate(0deg) !important; /* Straighten on hover */
-  opacity: 1; /* Fully opaque on hover */
+.chip-component.used-cpo {
+  background-color: var(--bmw-blue);
+  color: white;
 }
 
-/* Stock number style */
+.chip-component.default {
+  background-color: var(--bmw-blue);
+  color: white;
+}
+
+/* Night mode adjustments */
+.night-mode .chip-component.new-bmw,
+.night-mode .chip-component.default {
+  background-color: var(--chip-background);
+  color: var(--chip-text);
+  border-color: var(--chip-text);
+}
+
+/* Delivery Status */
+.chip-component.delivered {
+  transform: rotate(0deg);
+  opacity: 1;
+}
+
+.chip-component.pending {
+  transform: rotate(10deg);
+  opacity: 0.7;
+}
+
+/* Stock Number */
 .stock-number {
   font-weight: bold;
+  display: flex;
+  align-items: center;
 }
 
 /* Hover Information */
 .hover-info {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 5px;
   position: absolute;
-  top: 0;
-  left: 100%;
-  transform: translateX(10px);
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 8px;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   white-space: nowrap;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  color: black;
+  min-width: 200px;
 }
 
-/* Sale Type Styles */
-.new-bmw {
-  background-color: #d1e7ff;
-}
-
-.new-mini {
-  background-color: #ffebd1;
-}
-
-.used-cpo {
-  background-color: #f0e5d1;
-}
-
-.default {
-  background-color: #f0f0f0;
-}
-
-/* CPO Star */
-.cpo-star {
-  color: gold;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-/* Gold Star */
+/* Gold Star for CPO */
 .gold-star {
   color: gold;
   margin-left: 5px;
+}
+
+/* Night Mode Adjustments */
+.night-mode .chip-component {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.night-mode .hover-info {
+  background-color: rgba(42, 42, 42, 0.95);
+  color: #e0e0e0;
+  border: 1px solid #555;
+}
+
+/* Maintain colors in night mode */
+.night-mode .chip-component.new-bmw {
+  background-color: white;
+  color: var(--bmw-blue);
+}
+
+.night-mode .chip-component.new-mini {
+  background-color: var(--mini-green);
+  color: white;
+}
+
+.night-mode .chip-component.used-cpo,
+.night-mode .chip-component.default {
+  background-color: var(--bmw-blue);
+  color: white;
 }
