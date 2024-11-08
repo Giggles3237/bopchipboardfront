@@ -26,23 +26,23 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  overflow-y: auto;
+  padding: 20px;
 }
 
 .edit-sale-form {
-  background-color: var(--background-color);
+  background: white;
   padding: 20px;
   border-radius: 8px;
   width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin: auto;
-  position: relative;
-  box-sizing: border-box;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .edit-sale-form h2 {
@@ -53,18 +53,17 @@
 
 .edit-sale-form form {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 15px;
-  width: 100%;
 }
 
-.edit-sale-form form > div {
-  width: 100%;
-  box-sizing: border-box;
+.edit-sale-form div {
+  margin-bottom: 10px;
 }
 
 .edit-sale-form label {
-  font-weight: bold;
-  color: var(--text-color);
+  display: block;
+  margin-bottom: 5px;
 }
 
 .edit-sale-form input[type="text"],
@@ -73,7 +72,7 @@
 .react-datepicker-wrapper {
   width: 100%;
   padding: 8px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
   background-color: var(--background-color);
@@ -86,9 +85,10 @@
 }
 
 .form-buttons {
+  grid-column: 1 / -1;
   display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .form-buttons button {
@@ -216,4 +216,24 @@
 .react-datepicker__month-dropdown-container,
 .react-datepicker__year-dropdown-container {
   margin: 0 5px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .edit-sale-form {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .edit-sale-form form {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-buttons {
+    flex-direction: column;
+  }
+  
+  .form-buttons button {
+    width: 100%;
+  }
 }
