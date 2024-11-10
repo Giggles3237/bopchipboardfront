@@ -313,3 +313,12 @@ button:hover {
   background-color: rgba(220, 53, 69, 0.1);
   color: #ff6b6b;
 }
+
+.zoom-125 {
+  transform: scale(1.25);
+  transform-origin: top center;
+  height: calc(100vh / 1.25);
+  width: 80vw;
+  margin: 0 auto;
+  overflow-x: hidden;
+}

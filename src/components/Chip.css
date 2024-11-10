@@ -76,9 +76,10 @@
   transform: translateX(-50%);
   white-space: nowrap;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  z-index: 10000;
+  z-index: 2;
   color: black;
   min-width: 200px;
+  pointer-events: none;
 }
 
 /* Gold Star for CPO */
@@ -113,4 +114,22 @@
 .night-mode .chip-component.default {
   background-color: var(--bmw-blue);
   color: white;
+}
+
+.tooltip {
+  position: fixed;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  color: black;
+  min-width: 200px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  white-space: normal;
+  z-index: 1000;
+}
+
+.tooltip.visible {
+  opacity: 1;
 }

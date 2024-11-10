@@ -3,10 +3,12 @@ import EditSaleForm from './EditSaleForm';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function AddNewSale() {
+  const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
   const [salespeople, setSalespeople] = useState([]);
 
@@ -63,7 +65,7 @@ function AddNewSale() {
 
       if (response.status === 201 || response.status === 200) {
         alert('Sale added successfully!');
-        window.location.href = '/';
+        navigate('/');
       }
     } catch (error) {
       console.error('Error details:', error.response?.data);
@@ -77,7 +79,7 @@ function AddNewSale() {
       <EditSaleForm
         sale={initialSaleData}
         onSubmit={handleFormSubmit}
-        onCancel={() => window.location.href = '/'}
+        onCancel={() => navigate('/')}
         salespeople={salespeople}
       />
     </div>

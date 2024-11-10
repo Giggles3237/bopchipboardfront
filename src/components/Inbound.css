@@ -43,10 +43,12 @@
 
 /* Styling for headers and advisor names */
 .consultant-header, .month-header, .advisor-name, .month-cell {
-  background-color: var(--header-background); /* Background for these elements */
-  padding: 10px;                              /* Inner spacing */
-  display: flex;                              /* Use Flexbox for alignment */
-  align-items: center;                        /* Vertically center items */
+  background-color: var(--header-background);
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  line-height: 1.2;
 }
 
 /* Specific styling for consultant and month headers */
@@ -61,6 +63,7 @@
   white-space: nowrap;                        /* Prevent text from wrapping */
   overflow: hidden;                           /* Hide overflow text */
   text-overflow: ellipsis;                    /* Show ellipsis for overflow */
+  min-height: 28px;
 }
 
 /* Styling for each month cell */

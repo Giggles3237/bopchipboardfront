@@ -17,9 +17,13 @@
 }
 
 .chip-table {
-  max-width: 1000px;
+  zoom: 1.25;
+  -moz-transform: scale(1.25);
   margin: 0 auto;
   padding: 0 16px;
+  max-width: 80%;
+  position: relative;
+  z-index: 1;
 }
 
 .advisor-section {
@@ -71,6 +75,7 @@
   opacity: 0.8;
   font-size: 0.9em;
   font-weight: normal;
+  z-index: 3;
 }
 
 .advisor-stats .delivered {
@@ -105,6 +110,7 @@
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
+  z-index: 1;
 }
 
 .chip.delivered {
@@ -118,7 +124,7 @@
 .chip:hover {
   transform: translateY(-3px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  z-index: 10;
+  z-index: 100;
 }
 
 .chip.pending:hover {
@@ -130,6 +136,7 @@
   height: auto;
   padding: 8px;
   white-space: normal;
+  z-index: 1000;
 }
 
 .chip.new-bmw {
@@ -172,7 +179,7 @@
   width: 200px;
   min-height: fit-content;
   height: auto;
-  z-index: 10000;
+  z-index: 1000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   overflow: visible;
 }
@@ -242,8 +249,10 @@
 }
 
 @media (max-width: 1400px) {
-  .chips {
-    grid-template-columns: repeat(6, 1fr);
+  .chip-table {
+    zoom: 1;
+    -moz-transform: scale(1);
+    max-width: 100%;
   }
 }
 

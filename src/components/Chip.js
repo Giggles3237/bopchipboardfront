@@ -1,9 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
+import Tooltip from './Tooltip'; // Import the Tooltip component
 import { AuthContext } from '../contexts/AuthContext';
 import './Chip.css';
 
 function Chip({ sale, onEdit, isEditable }) {
   const [isHovered, setIsHovered] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({});
+  const chipRef = useRef(null);
   const { auth } = useContext(AuthContext);
   const isManagerOrAdmin = auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager';
 
@@ -39,23 +42,37 @@ function Chip({ sale, onEdit, isEditable }) {
     return name;
   };
 
+  const handleMouseEnter = () => {
+    if (chipRef.current) {
+      const rect = chipRef.current.getBoundingClientRect();
+      setTooltipPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + (rect.width / 2) + window.scrollX
+      });
+    }
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
   return (
     <div 
       className={`chip-component ${getChipClass()}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onClick={isEditable ? () => onEdit(sale) : undefined}
+      ref={chipRef}
     >
       <span className="stock-number">
         {sale.stockNumber}
         {(sale.type === 'CPO BMW' || sale.type === 'CPO MINI') && <span className="gold-star">★</span>}
       </span>
-      {isHovered && (
-        <div className="hover-info">
-          <p>{`${sale.color} ${sale.year} ${sale.make} ${sale.model}`}</p>
-          <p>{formatClientName(sale.clientName)}</p>
-        </div>
-      )}
+      <Tooltip visible={isHovered} position={tooltipPosition}>
+        <p>{`${sale.color} ${sale.year} ${sale.make} ${sale.model}`}</p>
+        <p>{formatClientName(sale.clientName)}</p>
+      </Tooltip>
     </div>
   );
 }
