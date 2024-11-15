@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import './SalesTable.css';
+import ReactPaginate from 'react-paginate';
 
 /**
  * SalesTable Component
@@ -12,9 +13,8 @@ import './SalesTable.css';
  * @param {Function} onEdit - Callback function to handle editing a sale.
  * @param {Function} onDelete - Callback function to handle deleting a sale.
  */
-function SalesTable({ sales, onEdit }) {
+function SalesTable({ sales, onEdit, onDelete }) {
   const { auth } = useContext(AuthContext);
-  const isManagerOrAdmin = auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager';
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage] = useState(25);
   const [filters, setFilters] = useState({
@@ -42,12 +42,19 @@ function SalesTable({ sales, onEdit }) {
     onEdit(sale);
   };
 
+  const handleDelete = async (e, sale) => {
+    e.stopPropagation(); // Prevent row click event
+    if (window.confirm('Are you sure you want to delete this sale?')) {
+      onDelete(sale);
+    }
+  };
+
   // Text formatting functions
   const formatClientName = (name, advisor) => {
     if (!name) return '';
     
     // Show client name only if user is manager/admin or if the sale belongs to the current user
-    if (!isManagerOrAdmin && advisor !== auth?.user?.name) {
+    if (!auth?.user?.role === 'Admin' && advisor !== auth?.user?.name) {
       return '***';
     }
 
@@ -89,20 +96,47 @@ function SalesTable({ sales, onEdit }) {
       .join(' ');
   };
 
+  const getFilteredData = () => {
+    return sales.filter(sale => {
+      return Object.keys(filters).every(key => {
+        const filterValue = filters[key].toLowerCase();
+        if (!filterValue) return true; // Skip empty filters
+        
+        let saleValue = String(sale[key] || '').toLowerCase();
+        
+        // Special handling for dates
+        if (key === 'deliveryDate' && sale[key]) {
+          saleValue = new Date(sale[key]).toLocaleDateString();
+        }
+        
+        // Special handling for delivered status
+        if (key === 'delivered') {
+          saleValue = sale[key] ? 'yes' : 'no';
+        }
+        
+        return saleValue.includes(filterValue);
+      });
+    });
+  };
+
   // Get current rows
+  const filteredData = getFilteredData();
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = sales.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
 
   // Calculate total pages
-  const totalPages = Math.ceil(sales.length / rowsPerPage);
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  const handlePageChange = (selectedItem) => {
+    setCurrentPage(selectedItem.selected + 1);
   };
 
   return (
     <div className="sales-table-container">
+      <div className="filtered-results">
+        Showing {filteredData.length} of {sales.length} total sales
+      </div>
       <table className="sales-table">
         <thead>
           <tr>
@@ -143,38 +177,40 @@ function SalesTable({ sales, onEdit }) {
               </td>
               <td>{sale.deliveryDate ? new Date(sale.deliveryDate).toLocaleDateString() : '-'}</td>
               <td>{sale.type}</td>
+              <td className="actions-cell">
+                <button 
+                  className="delete-button"
+                  onClick={(e) => handleDelete(e, sale)}
+                  title="Delete Sale"
+                >
+                  🗑️
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div className="pagination">
-        <button 
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="pagination-button"
-        >
-          Previous
-        </button>
-        
-        {[...Array(totalPages)].map((_, index) => (
-          <button
-            key={index + 1}
-            onClick={() => handlePageChange(index + 1)}
-            className={`pagination-button ${currentPage === index + 1 ? 'active' : ''}`}
-          >
-            {index + 1}
-          </button>
-        ))}
-
-        <button 
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="pagination-button"
-        >
-          Next
-        </button>
-      </div>
+      <ReactPaginate
+        previousLabel="Previous"
+        nextLabel="Next"
+        breakLabel="..."
+        pageCount={totalPages}
+        marginPagesDisplayed={2}
+        pageRangeDisplayed={5}
+        onPageChange={handlePageChange}
+        containerClassName="pagination"
+        pageClassName="pagination-item"
+        pageLinkClassName="pagination-link"
+        previousClassName="pagination-item"
+        previousLinkClassName="pagination-link"
+        nextClassName="pagination-item"
+        nextLinkClassName="pagination-link"
+        breakClassName="pagination-item"
+        breakLinkClassName="pagination-link"
+        activeClassName="active"
+        forcePage={currentPage - 1}
+      />
     </div>
   );
 }

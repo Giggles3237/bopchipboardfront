@@ -95,37 +95,64 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 12px;
-  gap: 6px;
+  gap: 4px;
+  padding: 20px;
+  list-style: none;
 }
 
-.pagination-button {
-  padding: 6px 10px;
+.pagination-item {
+  display: inline-block;
+}
+
+.pagination-link {
+  padding: 8px 12px;
   border: 1px solid var(--border-color);
-  background-color: var(--background-color);
-  color: var(--bmw-blue);
-  cursor: pointer;
   border-radius: 4px;
-  transition: all 0.2s;
-  font-size: 12px;
+  color: var(--text-color);
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  background: var(--background-color);
+  transition: all 0.2s ease;
 }
 
-.pagination-button:hover:not(:disabled) {
-  background-color: #007bff;
+.pagination-link:hover {
+  background-color: var(--light-gray);
+  border-color: var(--bmw-blue);
+}
+
+.pagination .active .pagination-link {
+  background-color: var(--bmw-blue);
   color: white;
-  border-color: #007bff;
+  border-color: var(--bmw-blue);
 }
 
-.pagination-button.active {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
+.pagination-link:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 102, 177, 0.2);
 }
 
-.pagination-button:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
+.pagination .disabled .pagination-link {
+  color: var(--border-color);
   cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Optional: Add responsive styles */
+@media (max-width: 768px) {
+  .pagination {
+    gap: 2px;
+  }
+
+  .pagination-link {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  /* Hide page numbers on mobile, show only prev/next and immediate siblings */
+  .pagination-item:not(.previous):not(.next):not(.active):not(.break) {
+    display: none;
+  }
 }
 
 /* Column-specific widths */
@@ -191,4 +218,38 @@
   color: var(--text-color);
   opacity: 0.5;
   font-style: italic;
+}
+
+.actions-cell {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.delete-button {
+  width: 0.4in;
+  padding: 2px 0;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 10px;
+  margin-left: 2px;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+  opacity: 1;
+}
+
+.filtered-results {
+  padding: 10px;
+  color: var(--text-color);
+  font-size: 0.9em;
+  text-align: right;
 }

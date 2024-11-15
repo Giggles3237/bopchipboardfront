@@ -18,7 +18,9 @@ import ChangePasswordForm from './components/ChangePasswordForm';
 import './App.css';
 
 // Base URL for the backend API, using environment variable or defaulting to localhost
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:5000/api'
+  : 'https://bopchipboard-c66df77a754d.herokuapp.com/api';
 
 /**
  * App Component
@@ -188,6 +190,45 @@ function App() {
     setIsDarkMode(!isDarkMode);
   };
 
+  const handleSaleDelete = async (saleToDelete) => {
+    try {
+      console.log('Attempting to delete sale:', saleToDelete.id);
+      console.log('API URL:', `${API_BASE_URL}/sales/${saleToDelete.id}`);
+      
+      const response = await axios.delete(
+        `${API_BASE_URL}/sales/${saleToDelete.id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${auth.token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.status === 200) {
+        setSales(prevSales => 
+          prevSales.filter(sale => sale.id !== saleToDelete.id)
+        );
+        if (filteredSales) {
+          setFilteredSales(prevFiltered =>
+            prevFiltered.filter(sale => sale.id !== saleToDelete.id)
+          );
+        }
+        alert('Sale deleted successfully');
+      }
+    } catch (error) {
+      console.error('Delete error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      alert(`Error deleting sale: ${error.response?.data?.message || error.message}`);
+    }
+  };
+
   return (
     <Router>
       <div className={`app-container ${isDarkMode ? 'night-mode' : ''}`}>
@@ -305,7 +346,11 @@ function App() {
                     </label>
                   </div>
                 </div>
-                <SalesTable sales={filteredSales || sales} onEdit={setEditingSale} />
+                <SalesTable 
+                  sales={filteredSales || sales} 
+                  onEdit={setEditingSale} 
+                  onDelete={handleSaleDelete}
+                />
               </>
             </PrivateRoute>
           } />
