@@ -15,6 +15,7 @@ import ReactPaginate from 'react-paginate';
  */
 function SalesTable({ sales, onEdit, onDelete }) {
   const { auth } = useContext(AuthContext);
+  const isManagerOrAdmin = auth?.user?.role === 'Manager' || auth?.user?.role === 'Admin';
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage] = useState(25);
   const [filters, setFilters] = useState({
@@ -42,7 +43,7 @@ function SalesTable({ sales, onEdit, onDelete }) {
     onEdit(sale);
   };
 
-  const handleDelete = async (e, sale) => {
+  const handleDelete = (e, sale) => {
     e.stopPropagation(); // Prevent row click event
     if (window.confirm('Are you sure you want to delete this sale?')) {
       onDelete(sale);
@@ -177,15 +178,17 @@ function SalesTable({ sales, onEdit, onDelete }) {
               </td>
               <td>{sale.deliveryDate ? new Date(sale.deliveryDate).toLocaleDateString() : '-'}</td>
               <td>{sale.type}</td>
-              <td className="actions-cell">
-                <button 
-                  className="delete-button"
-                  onClick={(e) => handleDelete(e, sale)}
-                  title="Delete Sale"
-                >
-                  🗑️
-                </button>
-              </td>
+              {isManagerOrAdmin && (
+                <td className="actions-cell">
+                  <button 
+                    className="delete-button"
+                    onClick={(e) => handleDelete(e, sale)}
+                    title="Delete Sale"
+                  >
+                    Delete
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

@@ -1,0 +1,67 @@
+.monthly-goal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 12px;
+  font-size: 0.9em;
+  min-width: 500px;
+}
+
+.goal-display {
+  flex: 0 0 60px;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s ease;
+  text-align: center;
+  margin-right: 12px;
+}
+
+.advisor-progress-wrapper {
+  position: absolute;
+  right: 0;
+  width: 200px !important;
+  min-width: 200px;
+  max-width: 200px;
+}
+
+.goal-edit {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.goal-edit input {
+  width: 60px;
+  padding: 2px 4px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.goal-edit button {
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+}
+
+.goal-edit button:first-of-type {
+  background: var(--bmw-blue);
+  color: white;
+  border: none;
+}
+
+.progress-bar {
+  width: 200px !important;
+  height: 4px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  transition: width 0.3s ease;
+}

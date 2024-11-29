@@ -21,7 +21,7 @@ function Login() {
     setError('');
     
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, credentials);
       console.log('Login response:', response.data);
       
       if (response.data.token && response.data.user) {

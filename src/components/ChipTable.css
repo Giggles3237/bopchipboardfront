@@ -51,13 +51,13 @@
 }
 
 .advisor-name {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: var(--light-gray);
   padding: 8px 16px;
   margin: 0 0 12px 0;
   width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .advisor-name h3 {
@@ -65,25 +65,41 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-weight: 700;
 }
 
 .advisor-stats {
   display: flex;
+  align-items: center;
   gap: 8px;
-  color: var(--text-color);
-  opacity: 0.8;
-  font-size: 0.9em;
-  font-weight: normal;
-  z-index: 3;
 }
 
 .advisor-stats .delivered {
   font-weight: 600;
+  color: var(--text-color);
 }
 
 .advisor-stats .pending {
-  opacity: 0.7;
+  font-size: 0.9em;
+  opacity: 0.5;
+}
+
+.advisor-progress-bar {
+  width: 50%;
+  height: 4px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.advisor-progress {
+  position: absolute;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-color: var(--bmw-blue);
+  transition: width 0.3s ease;
 }
 
 .chips {

@@ -249,3 +249,79 @@
   border-radius: 4px;
   font-size: 14px;
 }
+
+.team-goal-section {
+    padding: 24px;
+    background: var(--background-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 20px 0 32px 0;
+}
+
+.goal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 400px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-group input {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.current-goal {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(0, 102, 177, 0.1);
+    border-radius: 4px;
+    color: var(--text-color);
+}
+
+.team-goal-section button {
+    padding: 8px 16px;
+    background: var(--bmw-blue);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    align-self: flex-start;
+}
+
+.team-goal-section button:hover {
+    background: #005091;
+}
+
+.current-month-goal {
+    background: rgba(0, 102, 177, 0.1);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.current-month-goal h3 {
+    margin: 0;
+    color: var(--bmw-blue);
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.current-month-goal p {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+}

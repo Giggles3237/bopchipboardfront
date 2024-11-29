@@ -1,8 +1,12 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import Chip from './Chip';
 import './ChipTable.css';
 import { AuthContext } from '../contexts/AuthContext';
 import Totals from './Totals';
+import MonthlyGoal from './MonthlyGoal';
+import { format } from 'date-fns';
+import axios from 'axios';
+import TeamGoal from './TeamGoal';
 
 /**
  * ChipTable Component
@@ -17,6 +21,7 @@ import Totals from './Totals';
 function ChipTable({ sales = [], onEdit }) {
   // Accessing authentication information from AuthContext
   const { auth } = useContext(AuthContext);
+  const [goals, setGoals] = useState({});
 
   // Determining if the current user has managerial or administrative privileges
   const isManagerOrAdmin = auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager';
@@ -125,10 +130,55 @@ function ChipTable({ sales = [], onEdit }) {
     }
   };
 
+  const fetchGoals = useCallback(async () => {
+    try {
+      console.log('Fetching all goals');
+      const currentMonth = format(new Date(), 'yyyy-MM');
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_BASE_URL}/api/goals/month/${currentMonth}`,
+        {
+          headers: { 
+            'Authorization': `Bearer ${auth.token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      const goalsMap = response.data.reduce((acc, goal) => {
+        acc[goal.advisor_name] = goal.goal_count;
+        return acc;
+      }, {});
+      console.log('Goals fetch response:', response.data);
+      console.log('Constructed goals map:', goalsMap);
+      setGoals(goalsMap);
+    } catch (error) {
+      console.error('Error fetching goals:', error.response || error);
+    }
+  }, [auth.token]);
+
+  useEffect(() => {
+    fetchGoals();
+  }, [fetchGoals]);
+
+  console.log('Current goals state:', goals);
+  console.log('Progress bar values:', sortedAdvisors.map(advisor => ({
+    advisor: advisor.name,
+    delivered: advisor.delivered,
+    goal: goals[advisor.name],
+    width: `${Math.min((advisor.delivered / (goals[advisor.name] || 1)) * 100, 100)}%`
+  })));
+
   return (
     <div className="chip-table">
-      {/* Display Totals component if user is Manager or Admin */}
-      {isManagerOrAdmin && <Totals sales={sales} />}
+      {isManagerOrAdmin && (
+        <>
+          <TeamGoal 
+            month={format(new Date(), 'yyyy-MM')}
+            sales={sales}
+            individualGoals={goals}
+          />
+          <Totals sales={sales} />
+        </>
+      )}
       
       {/* Iterate over sorted advisors to display their sales chips */}
       {sortedAdvisors.map(({ name, delivered, pending }) => (
@@ -139,8 +189,23 @@ function ChipTable({ sales = [], onEdit }) {
               <div className="advisor-stats">
                 <span className="delivered">{delivered}</span>
                 <span className="pending">({pending})</span>
+                <MonthlyGoal 
+                  advisor={name} 
+                  month={format(new Date(), 'yyyy-MM')} 
+                  onUpdate={fetchGoals}
+                  deliveredCount={delivered}
+                />
               </div>
             </h3>
+            <div className="progress-bar">
+              <div 
+                className="progress" 
+                style={{ 
+                  width: `${Math.min((delivered / (goals[name] || 1)) * 100, 100)}%`,
+                  backgroundColor: delivered >= (goals[name] || 0) ? 'var(--mini-green)' : 'var(--bmw-blue)'
+                }} 
+              />
+            </div>
           </div>
           <div className="chips">
             {sales
