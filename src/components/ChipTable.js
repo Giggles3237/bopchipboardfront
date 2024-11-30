@@ -7,6 +7,7 @@ import MonthlyGoal from './MonthlyGoal';
 import { format } from 'date-fns';
 import axios from 'axios';
 import TeamGoal from './TeamGoal';
+import { API_BASE_URL } from '../config';
 
 /**
  * ChipTable Component
@@ -135,7 +136,7 @@ function ChipTable({ sales = [], onEdit }) {
       console.log('Fetching all goals');
       const currentMonth = format(new Date(), 'yyyy-MM');
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL}/api/goals/month/${currentMonth}`,
+        `${API_BASE_URL}/goals/month/${currentMonth}`,
         {
           headers: { 
             'Authorization': `Bearer ${auth.token}`,

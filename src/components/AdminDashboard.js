@@ -3,8 +3,7 @@ import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
 import './AdminDashboard.css';
 import { format } from 'date-fns';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+import { API_BASE_URL } from '../config';
 
 function AdminDashboard() {
     const [users, setUsers] = useState([]);
@@ -119,7 +118,7 @@ function AdminDashboard() {
             }
 
             const response = await axios.post(
-                `${process.env.REACT_APP_API_BASE_URL}/api/goals/team`,
+                `${API_BASE_URL}/api/goals/team`,
                 {
                     month: selectedMonth,
                     goal_count: parseInt(teamGoal)
@@ -150,18 +149,15 @@ function AdminDashboard() {
     const fetchCurrentMonthGoal = useCallback(async () => {
         try {
             const currentMonth = format(new Date(), 'yyyy-MM');
-            const url = `${process.env.REACT_APP_API_BASE_URL}/api/goals/team/${currentMonth}`;
-            console.log('AdminDashboard - Fetching team goal from:', url);
-            
-            const response = await axios.get(url, {
-                headers: { 
-                    'Authorization': `Bearer ${auth.token}`,
-                    'Content-Type': 'application/json'
+            const response = await axios.get(
+                `${API_BASE_URL}/goals/team/${currentMonth}`,
+                {
+                    headers: { 
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
-            });
-            
-            console.log('AdminDashboard - Raw response:', response);
-            console.log('AdminDashboard - Response data:', response.data);
+            );
             
             if (response.data === null || response.data === undefined) {
                 console.warn('AdminDashboard - No data received from team goal endpoint');
@@ -170,15 +166,12 @@ function AdminDashboard() {
             }
             
             const goalCount = response.data.goal_count;
-            console.log('AdminDashboard - Setting goal count to:', goalCount);
             setCurrentMonthGoal(goalCount);
             
         } catch (error) {
-            console.error('AdminDashboard - Error fetching team goal:', {
-                status: error.response?.status,
+            console.error('Error fetching current month goal:', {
                 message: error.message,
-                data: error.response?.data,
-                url: `${process.env.REACT_APP_API_BASE_URL}/api/goals/team/${format(new Date(), 'yyyy-MM')}`
+                url: `${API_BASE_URL}/goals/team/${format(new Date(), 'yyyy-MM')}`
             });
             setCurrentMonthGoal(0);
         }

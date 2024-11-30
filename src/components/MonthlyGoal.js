@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config';
 import './MonthlyGoal.css';
 
 function MonthlyGoal({ advisor, month, onUpdate, deliveredCount }) {
@@ -27,7 +28,7 @@ function MonthlyGoal({ advisor, month, onUpdate, deliveredCount }) {
     try {
       console.log('Fetching goal for:', advisor, month);
       const response = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL}/api/goals/${advisor}/${month}`,
+        `${API_BASE_URL}/goals/${advisor}/${month}`,
         {
           headers: { 
             'Authorization': `Bearer ${auth.token}`,
@@ -50,7 +51,7 @@ function MonthlyGoal({ advisor, month, onUpdate, deliveredCount }) {
   }, [advisor, month, canViewGoal, fetchGoal]);
 
   const handleSave = async () => {
-    const url = `${process.env.REACT_APP_API_BASE_URL}/api/goals`;
+    const url = `${API_BASE_URL}/goals`;
     try {
       console.log('Attempting to save goal to:', url);
       console.log('Goal data:', { 

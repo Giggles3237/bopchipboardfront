@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from './config';
 // Import your components
 import ChipTable from './components/ChipTable';
 import DateRangePicker from './components/DateRangePicker';
@@ -16,11 +17,6 @@ import PrivateRoute from './components/PrivateRoute';
 import ViewToggleBar from './components/ViewToggleBar';
 import ChangePasswordForm from './components/ChangePasswordForm';
 import './App.css';
-
-// Base URL for the backend API, using environment variable or defaulting to localhost
-const API_BASE_URL = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:5000/api'
-  : 'https://bopchipboard-c66df77a754d.herokuapp.com/api';
 
 /**
  * App Component

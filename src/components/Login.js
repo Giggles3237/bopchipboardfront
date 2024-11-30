@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+// Use Heroku URL directly
+const API_BASE_URL = 'https://bopchipboard-c66df77a754d.herokuapp.com/api';
 
 function Login() {
   const { login } = useContext(AuthContext);
@@ -20,11 +21,15 @@ function Login() {
     setIsLoading(true);
     setError('');
     
+    console.log('Attempting login with URL:', `${API_BASE_URL}/auth/login`);
+    console.log('Credentials:', { email: credentials.email, password: '***' });
+    
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, credentials);
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
       console.log('Login response:', response.data);
       
       if (response.data.token && response.data.user) {
+        console.log('Login successful, user:', response.data.user);
         login({
           token: response.data.token,
           user: response.data.user
@@ -32,7 +37,11 @@ function Login() {
         navigate('/', { replace: true });
       }
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('Login error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       setError(err.response?.data?.message || 'Login failed');
     } finally {
       setIsLoading(false);

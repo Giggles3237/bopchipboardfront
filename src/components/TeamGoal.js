@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config';
 import './TeamGoal.css';
 import './ProgressBar.css';
 
@@ -10,7 +11,7 @@ function TeamGoal({ month, sales, individualGoals }) {
 
   const fetchTeamGoal = useCallback(async () => {
     try {
-      const url = `${process.env.REACT_APP_API_BASE_URL}/api/goals/team/${month}`;
+      const url = `${API_BASE_URL}/goals/team/${month}`;
       console.log('Fetching team goal from:', url);
       
       const response = await axios.get(url, {
@@ -31,7 +32,7 @@ function TeamGoal({ month, sales, individualGoals }) {
       console.error('Error fetching team goal:', {
         status: error.response?.status,
         message: error.message,
-        url: `${process.env.REACT_APP_API_BASE_URL}/api/goals/team/${month}`,
+        url: `${API_BASE_URL}/goals/team/${month}`,
         month: month
       });
       setTeamGoal(0);
@@ -61,7 +62,7 @@ function TeamGoal({ month, sales, individualGoals }) {
     console.log('TeamGoal Component State Update:', {
         teamGoal,
         month,
-        url: `${process.env.REACT_APP_API_BASE_URL}/goals/team/${month}`,
+        url: `${API_BASE_URL}/goals/team/${month}`,
         timestamp: new Date().toISOString()
     });
   }, [teamGoal, month]);
