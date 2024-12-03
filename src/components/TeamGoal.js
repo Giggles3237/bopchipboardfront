@@ -1,72 +1,51 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
+import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import './TeamGoal.css';
-import './ProgressBar.css';
 
 function TeamGoal({ month, sales, individualGoals }) {
-  const [teamGoal, setTeamGoal] = useState(0);
   const { auth } = useContext(AuthContext);
+  const [teamGoal, setTeamGoal] = useState(0);
+  
+  const totalIndividualGoals = useMemo(() => 
+    Object.values(individualGoals || {}).reduce((sum, goal) => sum + (goal || 0), 0)
+  , [individualGoals]);
 
-  const fetchTeamGoal = useCallback(async () => {
-    try {
-      const url = `${API_BASE_URL}/goals/team/${month}`;
-      console.log('Fetching team goal from:', url);
-      
-      const response = await axios.get(url, {
-        headers: { 
-          'Authorization': `Bearer ${auth.token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.data === null || response.data === undefined) {
-        console.warn('No data received from team goal endpoint');
-        setTeamGoal(0);
-        return;
-      }
-      
-      setTeamGoal(response.data.goal_count || 0);
-    } catch (error) {
-      console.error('Error fetching team goal:', {
-        status: error.response?.status,
-        message: error.message,
-        url: `${API_BASE_URL}/goals/team/${month}`,
-        month: month
-      });
-      setTeamGoal(0);
-    }
-  }, [month, auth.token]);
-
-  useEffect(() => {
-    fetchTeamGoal();
-  }, [fetchTeamGoal]);
-
-  // Calculate totals
-  const totalIndividualGoals = Object.values(individualGoals).reduce((sum, goal) => sum + goal, 0);
   const deliveredCount = sales.filter(sale => sale.delivered).length;
   const pendingCount = sales.filter(sale => !sale.delivered).length;
-  
+
   useEffect(() => {
-    console.log('TeamGoal Component Debug:', {
-      teamGoal,
-      totalIndividualGoals,
-      deliveredCount,
-      pendingCount,
-      month
-    });
-  }, [teamGoal, totalIndividualGoals, deliveredCount, pendingCount, month]);
-  
-  useEffect(() => {
-    console.log('TeamGoal Component State Update:', {
-        teamGoal,
-        month,
-        url: `${API_BASE_URL}/goals/team/${month}`,
-        timestamp: new Date().toISOString()
-    });
-  }, [teamGoal, month]);
-  
+    const fetchTeamGoal = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/goals/team/${month}`,
+          {
+            headers: { 
+              'Authorization': `Bearer ${auth.token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        setTeamGoal(response.data?.goal_count || 0);
+      } catch (error) {
+        console.error('Error fetching team goal:', error);
+        setTeamGoal(0);
+      }
+    };
+
+    fetchTeamGoal();
+  }, [month, auth.token]);
+
+  console.log('TeamGoal Debug:', {
+    individualGoals,
+    totalIndividualGoals,
+    goals: Object.entries(individualGoals || {}).map(([advisor, goal]) => ({
+      advisor,
+      goal
+    }))
+  });
+
   return (
     <div className="team-goal">
       <div className="goal-header">

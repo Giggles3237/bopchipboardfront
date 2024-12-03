@@ -53,15 +53,19 @@
   border: none;
 }
 
-.progress-bar {
-  width: 200px !important;
+.monthly-goal .progress-container {
+  width: 100%;
+}
+
+.monthly-goal .progress-bar {
+  width: 100%;
   height: 4px;
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 2px;
   overflow: hidden;
 }
 
-.progress {
+.monthly-goal .progress {
   height: 100%;
   transition: width 0.3s ease;
 }

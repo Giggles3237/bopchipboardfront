@@ -51,11 +51,6 @@
   transition: width 0.3s ease;
 }
 
-.team-goal .progress.goals {
-  background-color: rgba(0, 102, 177, 0.3);
-  z-index: 1;
-}
-
 .team-goal .progress.delivered {
   background-color: var(--bmw-blue);
   z-index: 2;

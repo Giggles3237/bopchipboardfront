@@ -1,21 +1,29 @@
 .admin-dashboard {
   padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
 }
 
 .users-table-container {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
   margin: 20px 0;
 }
 
 .users-table {
   width: 100%;
+  overflow-x: auto;
   border-collapse: collapse;
   font-size: 0.95rem;
+}
+
+.table-wrapper {
+  width: 100%;
+}
+
+.users-table table {
+  width: 100%;
+  min-width: 800px;
 }
 
 .users-table th {

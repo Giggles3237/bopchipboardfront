@@ -5,7 +5,7 @@ import './EditSaleForm.css';
 import { AuthContext } from '../contexts/AuthContext';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://bopchipboard-c66df77a754d.herokuapp.com/api';
 
 function EditSaleForm({ sale, onSubmit, onCancel }) {
   const { auth } = useContext(AuthContext);

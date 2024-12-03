@@ -5,9 +5,11 @@ import { AuthContext } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://bopchipboard-c66df77a754d.herokuapp.com/api';
+console.log('API_BASE_URL initialized as:', API_BASE_URL);
 
 function AddNewSale() {
+  console.log('Using API URL:', API_BASE_URL);
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
   const [salespeople, setSalespeople] = useState([]);
@@ -44,6 +46,8 @@ function AddNewSale() {
 
   const handleFormSubmit = async (newSale) => {
     try {
+      console.log('Submitting sale data:', newSale);
+      
       const saleToSubmit = {
         ...newSale,
         advisor: newSale.advisor || auth?.user?.name,
@@ -51,6 +55,14 @@ function AddNewSale() {
         year: parseInt(newSale.year) || new Date().getFullYear(),
         delivered: Boolean(newSale.delivered)
       };
+
+      console.log('Formatted sale data:', saleToSubmit);
+
+      if (!API_BASE_URL) {
+        throw new Error('API URL is not configured. Please check your environment variables.');
+      }
+
+      console.log('Making request to:', `${API_BASE_URL}/sales`);
 
       const response = await axios.post(
         `${API_BASE_URL}/sales`, 
@@ -68,8 +80,23 @@ function AddNewSale() {
         navigate('/');
       }
     } catch (error) {
-      console.error('Error details:', error.response?.data);
-      alert(`Error adding new sale: ${error.response?.data?.message || error.message}`);
+      console.error('Full error:', error);
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        alert(`Error adding new sale: ${error.response.data?.message || 'Server error'}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received:', error.request);
+        alert('Error: No response received from server. Please check your connection.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error setting up request:', error.message);
+        alert(`Error: ${error.message}`);
+      }
     }
   };
 

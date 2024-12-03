@@ -31,7 +31,7 @@ function AdminDashboard() {
 
     const fetchUsers = useCallback(async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/users`, {
+            const response = await axios.get(`${API_BASE_URL}/users`, {
                 headers: { 
                     'Authorization': `Bearer ${auth.token}`
                 }
@@ -118,7 +118,7 @@ function AdminDashboard() {
             }
 
             const response = await axios.post(
-                `${API_BASE_URL}/api/goals/team`,
+                `${API_BASE_URL}/goals/team`,
                 {
                     month: selectedMonth,
                     goal_count: parseInt(teamGoal)
@@ -346,35 +346,37 @@ function AdminDashboard() {
                 </div>
             )}
 
-            <div className="users-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Organization</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map(user => (
-                            <tr key={user.id}>
-                                <td>{user.id}</td>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
-                                <td>{user.role_name}</td>
-                                <td>{user.organization_name}</td>
-                                <td>{user.status}</td>
-                                <td>
-                                    <button onClick={() => handleEdit(user)}>Edit</button>
-                                </td>
+            <div className="table-wrapper">
+                <div className="users-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Organization</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {users.map(user => (
+                                <tr key={user.id}>
+                                    <td>{user.id}</td>
+                                    <td>{user.name}</td>
+                                    <td>{user.email}</td>
+                                    <td>{user.role_name}</td>
+                                    <td>{user.organization_name}</td>
+                                    <td>{user.status}</td>
+                                    <td>
+                                        <button onClick={() => handleEdit(user)}>Edit</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );
