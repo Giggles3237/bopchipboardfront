@@ -27,12 +27,12 @@ html, body, #root {
   position: relative;
   padding: 20px;
   overflow: visible;
-  margin-bottom: 40px; /* Reduced bottom margin */
 }
 
 /* Table wrapper */
 .chip-table {
-  width: 100%;
+  width: 90%;
+  margin: 0 auto;
   border-collapse: collapse;
 }
 
@@ -46,7 +46,7 @@ html, body, #root {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 10px 0;
+  padding: 5px 0;
 }
 
 /* Keep header visible but not fixed */
@@ -55,6 +55,8 @@ html, body, #root {
   background: white;
   z-index: 1;
   position: relative;
+  width: 90%;
+  margin: 0 auto 20px auto;
 }
 
 /* Progress bar styles */
@@ -81,7 +83,7 @@ html, body, #root {
   align-items: center;
   background: var(--light-gray);
   padding: 8px 16px;
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   width: 100%;
 }
 
@@ -94,8 +96,10 @@ html, body, #root {
 
 /* Remove any overflow settings from parent containers */
 .advisor-section {
-  margin-bottom: 20px; /* Reduced margin between advisors */
-  padding-bottom: 10px; /* Reduced padding */
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-radius: 8px;
+  padding: 10px;
 }
 
 .advisor-section:hover {
