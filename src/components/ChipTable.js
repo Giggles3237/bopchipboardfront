@@ -139,6 +139,7 @@ function ChipTable({ sales = [], onEdit }) {
                     setEditingSale(sale);
                     setIsEditFormOpen(true);
                   }}
+                  isEditable={true}
                 />
               ))}
           </div>
@@ -148,10 +149,24 @@ function ChipTable({ sales = [], onEdit }) {
       {isEditFormOpen && editingSale && (
         <EditSaleForm
           sale={editingSale}
-          onClose={() => {
+          onSubmit={async (updatedSale) => {
+            try {
+              console.log('ChipTable: Attempting to save update:', updatedSale);
+              await onEdit(updatedSale);
+              console.log('ChipTable: Update successful');
+              setIsEditFormOpen(false);
+              setEditingSale(null);
+              
+              // Force a refresh of the parent component's data
+              window.location.reload();
+            } catch (error) {
+              console.error('ChipTable: Error updating sale:', error);
+              alert(`Error saving changes: ${error.message}`);
+            }
+          }}
+          onCancel={() => {
             setIsEditFormOpen(false);
             setEditingSale(null);
-            if (onEdit) onEdit();
           }}
         />
       )}

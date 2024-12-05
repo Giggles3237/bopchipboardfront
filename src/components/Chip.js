@@ -1,14 +1,25 @@
-import React, { useState, useContext, useRef } from 'react';
+import React, { useState, useContext, useRef, useMemo } from 'react';
 import Tooltip from './Tooltip'; // Import the Tooltip component
 import { AuthContext } from '../contexts/AuthContext';
 import './Chip.css';
 
-function Chip({ sale, onEdit, isEditable }) {
+function Chip({ sale, onEdit }) {
   const [isHovered, setIsHovered] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({});
   const chipRef = useRef(null);
   const { auth } = useContext(AuthContext);
-  const isManagerOrAdmin = auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager';
+  
+  // Determine if the current user is a manager or admin
+  const isManagerOrAdmin = useMemo(() => {
+    return auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager';
+  }, [auth]);
+
+  // Determine if the current user can edit this chip
+  const isEditable = useMemo(() => {
+    if (!auth?.user) return false;
+    if (isManagerOrAdmin) return true;
+    return auth.user.name === sale.advisor;
+  }, [auth, sale, isManagerOrAdmin]);
 
   if (!sale) {
     return null;
@@ -64,6 +75,7 @@ function Chip({ sale, onEdit, isEditable }) {
       onMouseLeave={handleMouseLeave}
       onClick={isEditable ? () => onEdit(sale) : undefined}
       ref={chipRef}
+      style={{ cursor: isEditable ? 'pointer' : 'default' }}
     >
       <span className="stock-number">
         {sale.stockNumber}

@@ -129,15 +129,25 @@ function App() {
    */
   const handleSaleUpdate = async (updatedSale) => {
     try {
+      console.log('App: Starting sale update:', updatedSale);
+      
+      // Ensure we have all required fields
+      if (!updatedSale.id) {
+        throw new Error('Sale ID is required for update');
+      }
+
       const response = await axios.put(
         `${API_BASE_URL}/sales/${updatedSale.id}`,
         updatedSale,
         {
           headers: {
-            Authorization: `Bearer ${auth.token}`
+            Authorization: `Bearer ${auth.token}`,
+            'Content-Type': 'application/json'
           }
         }
       );
+
+      console.log('App: Server response:', response);
 
       if (response.status === 200) {
         // Update the sale in the local state
@@ -148,10 +158,16 @@ function App() {
         );
         // Clear the editing state
         setEditingSale(null);
+        return response.data; // Return the updated sale data
       }
     } catch (error) {
-      console.error('Error updating sale:', error);
-      alert(`Error updating sale: ${error.response?.data?.message || error.message}`);
+      console.error('App: Error updating sale:', error);
+      console.error('App: Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      throw error; // Re-throw to be caught by the form
     }
   };
 

@@ -75,7 +75,7 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Starting form submission');
+    console.log('EditSaleForm: Starting form submission');
     
     // Add validation check before submission
     if (auth?.user?.role === 'Salesperson' && sale.advisor && sale.advisor !== auth.user.name) {
@@ -91,22 +91,21 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
 
       const submissionData = {
         ...formData,
+        id: sale.id,
         deliveryDate: formattedDate,
         delivered: Boolean(formData.delivered)
       };
       
-      console.log('Submission data prepared:', submissionData);
-      console.log('Calling onSubmit...');
+      console.log('EditSaleForm: Submission data prepared:', submissionData);
       
       await onSubmit(submissionData);
-      console.log('Submit successful, calling onCancel');
+      console.log('EditSaleForm: Submit successful');
+      
+      // Don't refresh the page immediately
       onCancel();
       
-      // Force page refresh after successful submission
-      window.location.reload();
-      
     } catch (error) {
-      console.error('Error in handleSubmit:', error);
+      console.error('EditSaleForm: Error in handleSubmit:', error);
       alert(`Error saving changes: ${error.message}`);
     }
   };
