@@ -77,14 +77,12 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
     e.preventDefault();
     console.log('EditSaleForm: Starting form submission');
     
-    // Add validation check before submission
     if (auth?.user?.role === 'Salesperson' && sale.advisor && sale.advisor !== auth.user.name) {
       alert('You can only edit your own sales.');
       return;
     }
     
     try {
-      // Format the date as YYYY-MM-DD
       const formattedDate = formData.deliveryDate instanceof Date 
         ? formData.deliveryDate.toISOString().split('T')[0]
         : new Date(formData.deliveryDate).toISOString().split('T')[0];
@@ -100,9 +98,7 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
       
       await onSubmit(submissionData);
       console.log('EditSaleForm: Submit successful');
-      
-      // Don't refresh the page immediately
-      onCancel();
+      onCancel(); // Only call onCancel after successful submission
       
     } catch (error) {
       console.error('EditSaleForm: Error in handleSubmit:', error);

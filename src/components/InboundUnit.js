@@ -36,11 +36,10 @@ const InboundUnit = ({ sale, onEdit }) => {
   // Check if the sale is Certified Pre-Owned
   const isCPO = sale.type === 'CPO BMW' || sale.type === 'CPO MINI';
 
-  /**
-   * Handles the click event to edit the sale.
-   */
   const handleClick = () => {
-    onEdit(sale); // Invoke the edit callback with the current sale
+    if (canSeeClientName()) {  // Only allow edit if they can see the client name
+      onEdit(sale);
+    }
   };
 
   /**
@@ -61,8 +60,8 @@ const InboundUnit = ({ sale, onEdit }) => {
 
   return (
     <div 
-      className={`inbound-unit ${unitClass}`}
-      onClick={handleClick} // Attach click handler for editing
+      className={`inbound-unit ${unitClass} ${isCPO ? 'cpo' : ''}`}
+      onClick={handleClick}
     >
       <span className="client-name">
         {displayText}

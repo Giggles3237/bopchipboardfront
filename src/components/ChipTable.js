@@ -7,7 +7,6 @@ import TeamGoal from './TeamGoal';
 import Totals from './Totals';
 import MonthlyGoal from './MonthlyGoal';
 import Chip from './Chip';
-import EditSaleForm from './EditSaleForm';
 import './ChipTable.css';
 
 /**
@@ -16,8 +15,6 @@ import './ChipTable.css';
 function ChipTable({ sales = [], onEdit }) {
   const { auth } = useAuth();
   const [goals, setGoals] = useState({});
-  const [editingSale, setEditingSale] = useState(null);
-  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
 
   const isManagerOrAdmin = auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager';
 
@@ -92,7 +89,7 @@ function ChipTable({ sales = [], onEdit }) {
 
   useEffect(() => {
     fetchGoals();
-  }, [fetchGoals]);
+  }, [sales, fetchGoals]);
 
   return (
     <div className="chip-table">
@@ -135,41 +132,13 @@ function ChipTable({ sales = [], onEdit }) {
                 <Chip
                   key={sale.id}
                   sale={sale}
-                  onEdit={() => {
-                    setEditingSale(sale);
-                    setIsEditFormOpen(true);
-                  }}
+                  onEdit={() => onEdit(sale)}
                   isEditable={true}
                 />
               ))}
           </div>
         </div>
       ))}
-
-      {isEditFormOpen && editingSale && (
-        <EditSaleForm
-          sale={editingSale}
-          onSubmit={async (updatedSale) => {
-            try {
-              console.log('ChipTable: Attempting to save update:', updatedSale);
-              await onEdit(updatedSale);
-              console.log('ChipTable: Update successful');
-              setIsEditFormOpen(false);
-              setEditingSale(null);
-              
-              // Force a refresh of the parent component's data
-              window.location.reload();
-            } catch (error) {
-              console.error('ChipTable: Error updating sale:', error);
-              alert(`Error saving changes: ${error.message}`);
-            }
-          }}
-          onCancel={() => {
-            setIsEditFormOpen(false);
-            setEditingSale(null);
-          }}
-        />
-      )}
     </div>
   );
 }

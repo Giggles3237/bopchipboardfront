@@ -131,7 +131,6 @@ function App() {
     try {
       console.log('App: Starting sale update:', updatedSale);
       
-      // Ensure we have all required fields
       if (!updatedSale.id) {
         throw new Error('Sale ID is required for update');
       }
@@ -150,23 +149,17 @@ function App() {
       console.log('App: Server response:', response);
 
       if (response.status === 200) {
-        // Update the sale in the local state
         setSales(prevSales => 
           prevSales.map(sale => 
-            sale.id === updatedSale.id ? updatedSale : sale
+            sale.id === updatedSale.id ? response.data : sale
           )
         );
-        // Clear the editing state
         setEditingSale(null);
-        return response.data; // Return the updated sale data
+        return response.data; // Make sure to return the response data
       }
+      return null; // Return null if status is not 200
     } catch (error) {
       console.error('App: Error updating sale:', error);
-      console.error('App: Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
       throw error; // Re-throw to be caught by the form
     }
   };
@@ -251,7 +244,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/inbound" element={
             <PrivateRoute>
-              <Inbound />
+              <Inbound handleSaleUpdate={handleSaleUpdate} />
             </PrivateRoute>
           } />
           <Route path="/add-sale" element={
