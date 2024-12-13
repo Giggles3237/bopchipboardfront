@@ -31,7 +31,7 @@
   display: grid;
   grid-template-columns: 200px repeat(3, 1fr);
   gap: 10px;
-  min-width: min-content;
+  width: 100%;
 }
 
 /* Ensures that header and advisor rows adopt grid's layout */

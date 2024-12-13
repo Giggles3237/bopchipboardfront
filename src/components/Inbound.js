@@ -26,7 +26,7 @@ const Inbound = ({ handleSaleUpdate }) => {
   const { auth } = useContext(AuthContext);
   
   // State to manage the current view mode ('chip' or 'list')
-  const [currentView, setCurrentView] = useState('chip');
+  const [currentView, setCurrentView] = useState('list');
 
   // State to manage the edit form
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
@@ -182,7 +182,7 @@ const Inbound = ({ handleSaleUpdate }) => {
                       <InboundUnit 
                         key={sale.id} 
                         sale={sale}
-                        onEdit={handleSaleUpdate}
+                        onEdit={() => onEdit(sale)}
                       />
                     ))
                   }
