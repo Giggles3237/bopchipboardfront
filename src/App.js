@@ -135,9 +135,16 @@ function App() {
         throw new Error('Sale ID is required for update');
       }
 
+      // Format the data before sending
+      const formattedSale = {
+        ...updatedSale,
+        delivered: Boolean(updatedSale.delivered),
+        deliveryDate: new Date(updatedSale.deliveryDate).toISOString().split('T')[0]
+      };
+
       const response = await axios.put(
         `${API_BASE_URL}/sales/${updatedSale.id}`,
-        updatedSale,
+        formattedSale,
         {
           headers: {
             Authorization: `Bearer ${auth.token}`,
@@ -154,13 +161,16 @@ function App() {
             sale.id === updatedSale.id ? response.data : sale
           )
         );
-        setEditingSale(null);
-        return response.data; // Make sure to return the response data
+        return response.data;
       }
-      return null; // Return null if status is not 200
+      return null;
     } catch (error) {
-      console.error('App: Error updating sale:', error);
-      throw error; // Re-throw to be caught by the form
+      console.error('App: Error updating sale:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      throw error;
     }
   };
 

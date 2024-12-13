@@ -85,10 +85,10 @@
 }
 
 .form-buttons {
-  grid-column: 1 / -1;
   display: flex;
   gap: 10px;
-  justify-content: flex-end;
+  margin-top: 20px;
+  align-items: center;
 }
 
 .form-buttons button {
@@ -236,4 +236,29 @@
   .form-buttons button {
     width: 100%;
   }
+}
+
+.delete-button {
+  background-color: transparent;
+  color: #dc3545;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+}
+
+.delete-button:hover {
+  color: #c82333;
+}
+
+.save-button {
+  background-color: #0056b3;
+  color: white;
 }

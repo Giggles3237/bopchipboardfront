@@ -3,10 +3,10 @@ import axios from 'axios';
 import { format, addMonths } from 'date-fns';
 import { AuthContext } from '../contexts/AuthContext';
 import InboundUnit from './InboundUnit';
-import ChipTable from './ChipTable';
 import EditSaleForm from './EditSaleForm';
 import './Inbound.css';
 import ViewToggleBar from './ViewToggleBar';
+import ChipTable from './ChipTable';
 
 /**
  * Inbound Component
@@ -59,8 +59,11 @@ const Inbound = ({ handleSaleUpdate }) => {
     const generateMonths = () => {
       const monthsList = [];
       let currentDate = new Date();
+      // Get next month as the starting point
+      currentDate.setMonth(currentDate.getMonth() + 1);
       
-      for (let i = 0; i < 6; i++) {
+      // Generate next 3 months
+      for (let i = 0; i < 3; i++) {
         monthsList.push(format(currentDate, 'MMMM yyyy'));
         currentDate = addMonths(currentDate, 1);
       }
@@ -138,22 +141,41 @@ const Inbound = ({ handleSaleUpdate }) => {
 
       {currentView === 'chip' ? (
         <ChipTable 
-          sales={pendingSales} 
-          onEdit={onEdit}
+          sales={pendingSales}
+          onEdit={handleSaleUpdate}
         />
       ) : (
-        <div className="inbound-list">
+        <div className="inbound-grid">
+          {/* Header row with month names */}
+          <div className="header-row">
+            <div className="advisor-column">Advisor</div>
+            {months.map(month => (
+              <div key={month} className="month-column">
+                {month}
+              </div>
+            ))}
+          </div>
+
+          {/* Data rows */}
           {sortedAdvisors.map(advisor => (
             <div key={advisor} className="advisor-row">
-              {pendingSales
-                .filter(sale => sale.advisor === advisor)
-                .map(sale => (
-                  <InboundUnit
-                    key={sale.id}
-                    sale={sale}
-                    onEdit={onEdit}
-                  />
-                ))}
+              <div className="advisor-name">{advisor}</div>
+              {months.map(month => (
+                <div key={`${advisor}-${month}`} className="month-cell">
+                  {groupedSales[advisor]
+                    ?.filter(sale => 
+                      format(new Date(sale.deliveryDate), 'MMMM yyyy') === month
+                    )
+                    .map(sale => (
+                      <InboundUnit 
+                        key={sale.id} 
+                        sale={sale}
+                        onEdit={handleSaleUpdate}
+                      />
+                    ))
+                  }
+                </div>
+              ))}
             </div>
           ))}
         </div>

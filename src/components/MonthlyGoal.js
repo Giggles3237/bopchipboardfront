@@ -11,10 +11,11 @@ function MonthlyGoal({ advisor, month, onUpdate, deliveredCount }) {
   const { auth } = useContext(AuthContext);
   
   const canViewGoal = auth?.user?.role === 'Admin' || 
-                      auth?.user?.role === 'Manager' || 
-                      auth?.user?.name === advisor;
+                     auth?.user?.role === 'Manager' || 
+                     auth?.user?.name === advisor;
 
-  const canEditGoal = auth?.user?.name === advisor;
+  const canEditGoal = auth?.user?.role === 'Admin' ||
+                     auth?.user?.name === advisor;
 
   const progressPercentage = goal > 0 ? Math.min((deliveredCount / goal) * 100, 100) : 0;
 
@@ -102,13 +103,19 @@ function MonthlyGoal({ advisor, month, onUpdate, deliveredCount }) {
             value={tempGoal}
             onChange={(e) => setTempGoal(Number(e.target.value))}
             min="0"
+            className="goal-input"
           />
-          <button onClick={handleSave}>Save</button>
-          <button onClick={() => setIsEditing(false)}>Cancel</button>
+          <button onClick={handleSave} className="save-goal">Save</button>
+          <button onClick={() => setIsEditing(false)} className="cancel-goal">Cancel</button>
         </div>
       ) : (
         <>
-          <div className="goal-display" onClick={handleClick}>
+          <div 
+            className="goal-display" 
+            onClick={handleClick}
+            title={canEditGoal ? "Click to edit goal" : undefined}
+            style={{ cursor: canEditGoal ? 'pointer' : 'default' }}
+          >
             {goal}
           </div>
           <div className="advisor-progress-wrapper">

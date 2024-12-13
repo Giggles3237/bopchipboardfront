@@ -36,9 +36,14 @@ const InboundUnit = ({ sale, onEdit }) => {
   // Check if the sale is Certified Pre-Owned
   const isCPO = sale.type === 'CPO BMW' || sale.type === 'CPO MINI';
 
-  const handleClick = () => {
-    if (canSeeClientName()) {  // Only allow edit if they can see the client name
-      onEdit(sale);
+  const handleClick = async () => {
+    if (canSeeClientName()) {
+      try {
+        await onEdit(sale);
+      } catch (error) {
+        console.error('Error updating sale:', error);
+        alert('Failed to update sale. Please try again.');
+      }
     }
   };
 

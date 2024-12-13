@@ -7,7 +7,7 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://bopchipboard-c66df77a754d.herokuapp.com/api';
 
-function EditSaleForm({ sale, onSubmit, onCancel }) {
+function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
   const { auth } = useContext(AuthContext);
   const [salespeople, setSalespeople] = useState([]);
 
@@ -109,6 +109,18 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
   const handleCancel = () => {
     console.log('Cancel clicked');
     onCancel();
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this sale? This action cannot be undone.')) {
+      try {
+        await onDelete(sale);
+        onCancel(); // Close the form after successful deletion
+      } catch (error) {
+        console.error('Error deleting sale:', error);
+        alert(`Error deleting sale: ${error.message}`);
+      }
+    }
   };
 
   const vehicleTypes = [
@@ -254,7 +266,17 @@ function EditSaleForm({ sale, onSubmit, onCancel }) {
             </select>
           </div>
           <div className="form-buttons">
-            <button type="submit">Save Changes</button>
+            <button type="submit" className="save-button">Save Changes</button>
+            {sale.id && !formData.delivered && ( // Only show delete button for existing, undelivered sales
+              <button 
+                type="button" 
+                className="delete-button"
+                onClick={handleDelete}
+                title="Delete Sale"
+              >
+                🗑️
+              </button>
+            )}
             <button type="button" onClick={handleCancel}>Cancel</button>
           </div>
         </form>

@@ -28,29 +28,44 @@
 
 .goal-edit {
   display: flex;
-  gap: 8px;
+  gap: 5px;
   align-items: center;
 }
 
-.goal-edit input {
+.goal-input {
   width: 60px;
-  padding: 2px 4px;
-  border: 1px solid #ddd;
+  padding: 4px;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
+  text-align: center;
 }
 
-.goal-edit button {
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  background: white;
-  cursor: pointer;
-}
-
-.goal-edit button:first-of-type {
-  background: var(--bmw-blue);
-  color: white;
+.save-goal, .cancel-goal {
+  padding: 4px 8px;
   border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8em;
+}
+
+.save-goal {
+  background-color: var(--bmw-blue);
+  color: white;
+}
+
+.cancel-goal {
+  background-color: #6c757d;
+  color: white;
+}
+
+.goal-display {
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.goal-display[title]:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .monthly-goal .progress-container {
