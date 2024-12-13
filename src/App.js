@@ -156,11 +156,28 @@ function App() {
       console.log('App: Server response:', response);
 
       if (response.status === 200) {
+        // Update all relevant state
         setSales(prevSales => 
           prevSales.map(sale => 
             sale.id === updatedSale.id ? response.data : sale
           )
         );
+        
+        // Update filtered sales if they exist
+        if (filteredSales) {
+          setFilteredSales(prevFiltered => 
+            prevFiltered.map(sale => 
+              sale.id === updatedSale.id ? response.data : sale
+            )
+          );
+        }
+        
+        // Trigger a refresh of the pending sales if needed
+        if (response.data.delivered !== updatedSale.delivered) {
+          // Optional: Emit an event for components that need to refresh
+          window.dispatchEvent(new CustomEvent('salesUpdated'));
+        }
+        
         return response.data;
       }
       return null;

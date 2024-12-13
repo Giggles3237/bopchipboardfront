@@ -132,6 +132,18 @@ const Inbound = ({ handleSaleUpdate }) => {
     }
   };
 
+  useEffect(() => {
+    const handleSalesUpdate = () => {
+      fetchPendingSales();
+    };
+
+    window.addEventListener('salesUpdated', handleSalesUpdate);
+    
+    return () => {
+      window.removeEventListener('salesUpdated', handleSalesUpdate);
+    };
+  }, [fetchPendingSales]);
+
   return (
     <div className="inbound-container">
       <ViewToggleBar 
@@ -142,7 +154,7 @@ const Inbound = ({ handleSaleUpdate }) => {
       {currentView === 'chip' ? (
         <ChipTable 
           sales={pendingSales}
-          onEdit={handleSaleUpdate}
+          onEdit={onEdit}
         />
       ) : (
         <div className="inbound-grid">
