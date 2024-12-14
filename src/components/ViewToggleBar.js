@@ -5,29 +5,24 @@ import './ViewToggleBar.css';
 const ViewToggleBar = () => {
   const location = useLocation();
 
-  const getButtonClass = (path) => {
-    if (path === 'chip' && location.pathname === '/') return 'view-button active';
-    if (path === 'list' && location.pathname === '/sales-table') return 'view-button active';
-    if (path === 'inbound' && location.pathname === '/inbound') return 'view-button active';
-    if (path === 'add-sale' && location.pathname === '/add-sale') return 'view-button active';
-    return 'view-button';
-  };
-
   return (
     <div className="view-toggle-bar">
       <div className="left-buttons">
-        <Link to="/" className={getButtonClass('chip')}>
+        <Link to="/" className={location.pathname === '/' ? 'view-button active' : 'view-button'}>
           Chip View
         </Link>
-        <Link to="/sales-table" className={getButtonClass('list')}>
+        <Link to="/sales-table" className={location.pathname === '/sales-table' ? 'view-button active' : 'view-button'}>
           List View
         </Link>
-        <Link to="/inbound" className={getButtonClass('inbound')}>
+        <Link to="/inbound" className={location.pathname === '/inbound' ? 'view-button active' : 'view-button'}>
           Inbound
+        </Link>
+        <Link to="/salesperson-dashboard" className={location.pathname === '/salesperson-dashboard' ? 'view-button active' : 'view-button'}>
+          Dashboard
         </Link>
       </div>
       <div className="right-buttons">
-        <Link to="/add-sale" className={getButtonClass('add-sale')}>
+        <Link to="/add-sale" className={location.pathname === '/add-sale' ? 'view-button active' : 'view-button'}>
           Add New Sale
         </Link>
       </div>

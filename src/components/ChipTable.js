@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { format } from 'date-fns';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE_URL } from '../config';
-import TeamGoal from './TeamGoal';
 import Totals from './Totals';
 import MonthlyGoal from './MonthlyGoal';
 import Chip from './Chip';
@@ -14,7 +13,6 @@ import './ChipTable.css';
  */
 function ChipTable({ sales = [], onEdit }) {
   const { auth } = useAuth();
-  const [goals, setGoals] = useState({});
 
   const isManagerOrAdmin = auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager';
 
@@ -79,11 +77,8 @@ function ChipTable({ sales = [], onEdit }) {
         advisors
       });
 
-      setGoals(goalsMap);
-      
     } catch (error) {
       console.error('Error fetching goals:', error);
-      setGoals({});
     }
   }, [sales, auth.token]);
 
@@ -93,11 +88,6 @@ function ChipTable({ sales = [], onEdit }) {
 
   return (
     <div className="chip-table">
-      <TeamGoal 
-        month={format(new Date(), 'yyyy-MM')}
-        sales={sales}
-        individualGoals={goals}
-      />
       {isManagerOrAdmin && (
         <Totals sales={sales} />
       )}

@@ -112,6 +112,11 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
   };
 
   const handleDelete = async () => {
+    if (!onDelete) {
+      console.warn('Delete functionality not available');
+      return;
+    }
+
     if (window.confirm('Are you sure you want to delete this sale? This action cannot be undone.')) {
       try {
         await onDelete(sale);

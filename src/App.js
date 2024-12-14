@@ -17,6 +17,7 @@ import PrivateRoute from './components/PrivateRoute';
 import ViewToggleBar from './components/ViewToggleBar';
 import ChangePasswordForm from './components/ChangePasswordForm';
 import './App.css';
+import SalespersonDashboard from './components/SalespersonDashboard';
 
 /**
  * App Component
@@ -394,6 +395,17 @@ function App() {
               </PrivateRoute>
             } 
           />
+          <Route path="/salesperson-dashboard" element={
+            <PrivateRoute>
+              <SalespersonDashboard />
+            </PrivateRoute>
+          } />
+          <Route path="/salesperson-dashboard/:advisorId?" element={
+            <PrivateRoute>
+              <ViewToggleBar />
+              <SalespersonDashboard />
+            </PrivateRoute>
+          } />
         </Routes>
 
         {editingSale && (
@@ -401,6 +413,7 @@ function App() {
             sale={editingSale}
             onSubmit={handleSaleUpdate}
             onCancel={() => setEditingSale(null)}
+            onDelete={handleSaleDelete}
           />
         )}
       </div>
