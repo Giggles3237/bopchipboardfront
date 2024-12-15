@@ -2,6 +2,9 @@ import React, { useState, useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from './config';
+import { useDebounce } from './hooks/useDebounce';
+import { apiService } from './services/apiService';
+
 // Import your components
 import ChipTable from './components/ChipTable';
 import DateRangePicker from './components/DateRangePicker';
@@ -18,47 +21,50 @@ import ViewToggleBar from './components/ViewToggleBar';
 import ChangePasswordForm from './components/ChangePasswordForm';
 import './App.css';
 import SalespersonDashboard from './components/SalespersonDashboard';
+import ErrorBoundary from './components/ErrorBoundary';
 
 /**
  * App Component
  * The main component that sets up routing, manages global state, and handles data fetching
  */
 function App() {
-  const { auth } = useContext(AuthContext); // Access authentication context
-  const [searchTerm, setSearchTerm] = useState(''); // State for search input
+  const { auth } = useContext(AuthContext);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300); // Add debouncing to search
+  
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
-    return new Date(date.getFullYear(), date.getMonth(), 1); // Initialize to first day of current month
+    return new Date(date.getFullYear(), date.getMonth(), 1);
   });
+  
   const [endDate, setEndDate] = useState(() => {
     const date = new Date();
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0); // Initialize to last day of current month
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0);
   });
-  const [editingSale, setEditingSale] = useState(null); // State to track which sale is being edited
-  const [sales, setSales] = useState([]); // All sales data
-  const [filteredSales, setFilteredSales] = useState(null); // Sales data after filtering
-  const [searchArchive, setSearchArchive] = useState(false); // Whether to include archived sales in search
-  const [loading, setLoading] = useState(false); // Loading state for data fetching
-  const [error, setError] = useState(null); // Error state for data fetching
+  
+  const [editingSale, setEditingSale] = useState(null);
+  const [sales, setSales] = useState([]);
+  const [filteredSales, setFilteredSales] = useState(null);
+  const [searchArchive, setSearchArchive] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   /**
-   * useEffect to fetch sales data from the backend API whenever authentication token, start date, or end date changes
+   * useEffect to fetch sales data from the backend API with caching
    */
   useEffect(() => {
     const fetchSales = async () => {
+      if (!auth?.token) return;
+      
       setLoading(true);
       try {
-        console.log('Fetching sales with token:', auth?.token);
-        const response = await axios.get(`${API_BASE_URL}/sales`, {
-          headers: {
-            Authorization: `Bearer ${auth?.token}`
-          }
-        });
-        console.log('Sales response:', response.data);
-        setSales(response.data);
+        // Use the apiService to fetch with caching
+        const data = await apiService.fetchWithCache('/sales', auth.token);
+        setSales(data);
+        
         // Filter sales within the selected date range
-        const filtered = response.data.filter(sale => {
+        const filtered = data.filter(sale => {
           const saleDate = new Date(sale.deliveryDate);
           return saleDate >= startDate && saleDate <= endDate;
         });
@@ -71,72 +77,61 @@ function App() {
       }
     };
 
-    // Fetch sales data only if the user is authenticated
-    if (auth?.token) {
-      fetchSales();
-    }
+    fetchSales();
   }, [auth?.token, startDate, endDate]);
 
   /**
-   * Handler for search input changes
-   * Filters sales based on the search term and archive toggle state
+   * useEffect for handling search with debouncing
    */
-  const handleSearch = (e) => {
-    const searchValue = e.target.value.toLowerCase();
-    setSearchTerm(searchValue);
-    
+  useEffect(() => {
+    if (!debouncedSearchTerm && !searchArchive) {
+      const filtered = sales.filter(sale => {
+        const saleDate = new Date(sale.deliveryDate);
+        return saleDate >= startDate && saleDate <= endDate;
+      });
+      setFilteredSales(filtered);
+      return;
+    }
+
     const filtered = sales.filter(sale => {
-      // Check if any field of the sale contains the search term
       const matchesSearch = Object.values(sale).some(value => 
-        String(value).toLowerCase().includes(searchValue)
+        String(value).toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
       
       if (searchArchive) {
-        // If archive search is enabled, include all matching sales
         return matchesSearch;
       } else {
-        // Otherwise, include only sales within the date range
         const saleDate = new Date(sale.deliveryDate);
         return matchesSearch && saleDate >= startDate && saleDate <= endDate;
       }
     });
     setFilteredSales(filtered);
+  }, [debouncedSearchTerm, sales, startDate, endDate, searchArchive]);
+
+  /**
+   * Handler for search input changes
+   */
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
   };
 
   /**
    * Handler for date range changes
-   * Updates the start and end dates and filters sales accordingly
    */
   const handleDateChange = (start, end) => {
     setStartDate(start);
     setEndDate(end);
-    
-    if (start && end) {
-      // Filter sales within the new date range
-      const filtered = sales.filter(sale => {
-        const saleDate = new Date(sale.deliveryDate);
-        return saleDate >= start && saleDate <= end;
-      });
-      setFilteredSales(filtered);
-    } else {
-      // If dates are not set, show all sales
-      setFilteredSales(sales);
-    }
   };
 
   /**
-   * Handler to update a sale
-   * Makes an API call to update the sale in the backend and updates the state accordingly
+   * Handler to update a sale with cache invalidation
    */
   const handleSaleUpdate = async (updatedSale) => {
     try {
-      console.log('App: Starting sale update:', updatedSale);
-      
       if (!updatedSale.id) {
         throw new Error('Sale ID is required for update');
       }
 
-      // Format the data before sending
       const formattedSale = {
         ...updatedSale,
         delivered: Boolean(updatedSale.delivered),
@@ -154,17 +149,17 @@ function App() {
         }
       );
 
-      console.log('App: Server response:', response);
-
       if (response.status === 200) {
-        // Update all relevant state
+        // Invalidate cache after successful update
+        apiService.clearCache();
+        
+        // Update state
         setSales(prevSales => 
           prevSales.map(sale => 
             sale.id === updatedSale.id ? response.data : sale
           )
         );
         
-        // Update filtered sales if they exist
         if (filteredSales) {
           setFilteredSales(prevFiltered => 
             prevFiltered.map(sale => 
@@ -173,9 +168,7 @@ function App() {
           );
         }
         
-        // Trigger a refresh of the pending sales if needed
         if (response.data.delivered !== updatedSale.delivered) {
-          // Optional: Emit an event for components that need to refresh
           window.dispatchEvent(new CustomEvent('salesUpdated'));
         }
         
@@ -194,7 +187,6 @@ function App() {
 
   /**
    * Handler for toggling the archive search
-   * Updates the searchArchive state and refilters the sales if a search term is present
    */
   const handleArchiveToggle = (e) => {
     const isChecked = e.target.checked;
@@ -207,10 +199,8 @@ function App() {
         );
         
         if (isChecked) {
-          // Include all matching sales if archive search is enabled
           return matchesSearch;
         } else {
-          // Otherwise, include only sales within the date range
           const saleDate = new Date(sale.deliveryDate);
           return matchesSearch && saleDate >= startDate && saleDate <= endDate;
         }
@@ -225,9 +215,6 @@ function App() {
 
   const handleSaleDelete = async (saleToDelete) => {
     try {
-      console.log('Attempting to delete sale:', saleToDelete.id);
-      console.log('API URL:', `${API_BASE_URL}/sales/${saleToDelete.id}`);
-      
       const response = await axios.delete(
         `${API_BASE_URL}/sales/${saleToDelete.id}`,
         {
@@ -241,6 +228,9 @@ function App() {
       );
 
       if (response.status === 200) {
+        // Invalidate cache after successful delete
+        apiService.clearCache();
+        
         setSales(prevSales => 
           prevSales.filter(sale => sale.id !== saleToDelete.id)
         );
@@ -264,159 +254,159 @@ function App() {
 
   return (
     <Router>
-      <div className={`app-container ${isDarkMode ? 'night-mode' : ''}`}>
-        <NavbarComponent isDarkMode={isDarkMode} onToggleTheme={handleToggleTheme} />
-        {loading && <p>Loading sales data...</p>}
-        {error && <p className="error-message">{error}</p>}
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/inbound" element={
-            <PrivateRoute>
-              <Inbound handleSaleUpdate={handleSaleUpdate} />
-            </PrivateRoute>
-          } />
-          <Route path="/add-sale" element={
-            <PrivateRoute>
-              <AddNewSale />
-            </PrivateRoute>
-          } />
-          <Route path="/admin" element={
-            <PrivateRoute roles={['Admin']}>
-              <AdminDashboard />
-            </PrivateRoute>
-          } />
-          <Route path="/" element={
-            <PrivateRoute>
-              <>
-                <ViewToggleBar />
-                <div className="search-date-container">
-                  <div className="search-bar">
-                    {/* Search icon SVG */}
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      width="16" 
-                      height="16" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input
-                      type="text"
-                      placeholder="Search sales..."
-                      value={searchTerm}
-                      onChange={handleSearch}
-                    />
-                  </div>
-                  <DateRangePicker
-                    startDate={startDate}
-                    endDate={endDate}
-                    onDateChange={handleDateChange}
-                  />
-                  <div className="archive-toggle">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={searchArchive}
-                        onChange={handleArchiveToggle}
-                      />
-                      Search Archive
-                    </label>
-                  </div>
-                </div>
-                <div className="zoom-125">
-                  <ChipTable sales={filteredSales || sales} onEdit={setEditingSale} />
-                </div>
-              </>
-            </PrivateRoute>
-          } />
-          <Route path="/sales-table" element={
-            <PrivateRoute>
-              <>
-                <ViewToggleBar />
-                <div className="search-date-container">
-                  <div className="search-bar">
-                    {/* Search icon SVG */}
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      width="16" 
-                      height="16" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input
-                      type="text"
-                      placeholder="Search sales..."
-                      value={searchTerm}
-                      onChange={handleSearch}
-                    />
-                  </div>
-                  <DateRangePicker
-                    startDate={startDate}
-                    endDate={endDate}
-                    onDateChange={handleDateChange}
-                  />
-                  <div className="archive-toggle">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={searchArchive}
-                        onChange={handleArchiveToggle}
-                      />
-                      Search Archive
-                    </label>
-                  </div>
-                </div>
-                <SalesTable 
-                  sales={filteredSales || sales} 
-                  onEdit={setEditingSale} 
-                  onDelete={handleSaleDelete}
-                />
-              </>
-            </PrivateRoute>
-          } />
-          <Route 
-            path="/change-password" 
-            element={
+      <ErrorBoundary>
+        <div className={`app-container ${isDarkMode ? 'night-mode' : ''}`}>
+          <NavbarComponent isDarkMode={isDarkMode} onToggleTheme={handleToggleTheme} />
+          {loading && <p>Loading sales data...</p>}
+          {error && <p className="error-message">{error}</p>}
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/inbound" element={
               <PrivateRoute>
-                <ChangePasswordForm />
+                <Inbound handleSaleUpdate={handleSaleUpdate} />
               </PrivateRoute>
-            } 
-          />
-          <Route path="/salesperson-dashboard" element={
-            <PrivateRoute>
-              <SalespersonDashboard />
-            </PrivateRoute>
-          } />
-          <Route path="/salesperson-dashboard/:advisorId?" element={
-            <PrivateRoute>
-              <ViewToggleBar />
-              <SalespersonDashboard />
-            </PrivateRoute>
-          } />
-        </Routes>
+            } />
+            <Route path="/add-sale" element={
+              <PrivateRoute>
+                <AddNewSale />
+              </PrivateRoute>
+            } />
+            <Route path="/admin" element={
+              <PrivateRoute roles={['Admin']}>
+                <AdminDashboard />
+              </PrivateRoute>
+            } />
+            <Route path="/" element={
+              <PrivateRoute>
+                <>
+                  <ViewToggleBar />
+                  <div className="search-date-container">
+                    <div className="search-bar">
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>
+                      <input
+                        type="text"
+                        placeholder="Search sales..."
+                        value={searchTerm}
+                        onChange={handleSearch}
+                      />
+                    </div>
+                    <DateRangePicker
+                      startDate={startDate}
+                      endDate={endDate}
+                      onDateChange={handleDateChange}
+                    />
+                    <div className="archive-toggle">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={searchArchive}
+                          onChange={handleArchiveToggle}
+                        />
+                        Search Archive
+                      </label>
+                    </div>
+                  </div>
+                  <div className="zoom-125">
+                    <ChipTable sales={filteredSales || sales} onEdit={setEditingSale} />
+                  </div>
+                </>
+              </PrivateRoute>
+            } />
+            <Route path="/sales-table" element={
+              <PrivateRoute>
+                <>
+                  <ViewToggleBar />
+                  <div className="search-date-container">
+                    <div className="search-bar">
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>
+                      <input
+                        type="text"
+                        placeholder="Search sales..."
+                        value={searchTerm}
+                        onChange={handleSearch}
+                      />
+                    </div>
+                    <DateRangePicker
+                      startDate={startDate}
+                      endDate={endDate}
+                      onDateChange={handleDateChange}
+                    />
+                    <div className="archive-toggle">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={searchArchive}
+                          onChange={handleArchiveToggle}
+                        />
+                        Search Archive
+                      </label>
+                    </div>
+                  </div>
+                  <SalesTable 
+                    sales={filteredSales || sales} 
+                    onEdit={setEditingSale} 
+                    onDelete={handleSaleDelete}
+                  />
+                </>
+              </PrivateRoute>
+            } />
+            <Route 
+              path="/change-password" 
+              element={
+                <PrivateRoute>
+                  <ChangePasswordForm />
+                </PrivateRoute>
+              } 
+            />
+            <Route path="/salesperson-dashboard" element={
+              <PrivateRoute>
+                <SalespersonDashboard />
+              </PrivateRoute>
+            } />
+            <Route path="/salesperson-dashboard/:advisorId?" element={
+              <PrivateRoute>
+                <ViewToggleBar />
+                <SalespersonDashboard />
+              </PrivateRoute>
+            } />
+          </Routes>
 
-        {editingSale && (
-          <EditSaleForm
-            sale={editingSale}
-            onSubmit={handleSaleUpdate}
-            onCancel={() => setEditingSale(null)}
-            onDelete={handleSaleDelete}
-          />
-        )}
-      </div>
+          {editingSale && (
+            <EditSaleForm
+              sale={editingSale}
+              onSubmit={handleSaleUpdate}
+              onCancel={() => setEditingSale(null)}
+              onDelete={handleSaleDelete}
+            />
+          )}
+        </div>
+      </ErrorBoundary>
     </Router>
   );
 }

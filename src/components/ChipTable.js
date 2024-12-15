@@ -26,7 +26,12 @@ function ChipTable({ sales = [], onEdit }) {
   const sortedAdvisors = useMemo(() => {
     const advisorStats = sales.reduce((acc, sale) => {
       if (!acc[sale.advisor]) {
-        acc[sale.advisor] = { name: sale.advisor, delivered: 0, pending: 0 };
+        acc[sale.advisor] = { 
+          name: sale.advisor, 
+          delivered: 0, 
+          pending: 0,
+          isHouse: sale.advisor.toLowerCase().includes('house') 
+        };
       }
       if (sale.delivered) {
         acc[sale.advisor].delivered++;
@@ -36,9 +41,14 @@ function ChipTable({ sales = [], onEdit }) {
       return acc;
     }, {});
 
-    return Object.values(advisorStats).sort((a, b) => 
-      (b.delivered + b.pending) - (a.delivered + a.pending)
-    );
+    return Object.values(advisorStats).sort((a, b) => {
+      // Always put house at the bottom
+      if (a.isHouse) return 1;
+      if (b.isHouse) return -1;
+      
+      // Sort others by total sales
+      return (b.delivered + b.pending) - (a.delivered + a.pending);
+    });
   }, [sales]);
 
   const fetchGoals = useCallback(async () => {
@@ -86,6 +96,11 @@ function ChipTable({ sales = [], onEdit }) {
     fetchGoals();
   }, [sales, fetchGoals]);
 
+  // Add a function to determine if goal number should be visible
+  const canSeeGoalNumber = (advisorName) => {
+    return isManagerOrAdmin || auth?.user?.name === advisorName;
+  };
+
   return (
     <div className="chip-table">
       {isManagerOrAdmin && (
@@ -105,6 +120,7 @@ function ChipTable({ sales = [], onEdit }) {
                   month={format(new Date(), 'yyyy-MM')} 
                   onUpdate={fetchGoals}
                   deliveredCount={delivered}
+                  showGoalNumber={canSeeGoalNumber(name)}
                 />
               </div>
             </h3>

@@ -16,6 +16,17 @@
   transition: background-color 0.2s ease;
   text-align: center;
   margin-right: 12px;
+  user-select: none;
+}
+
+.goal-display:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.goal-number {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
 }
 
 .advisor-progress-wrapper {
@@ -74,13 +85,20 @@
 
 .monthly-goal .progress-bar {
   width: 100%;
-  height: 4px;
+  height: 8px;
   background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
+  border-radius: 4px;
   overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .monthly-goal .progress {
   height: 100%;
   transition: width 0.3s ease;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
 }

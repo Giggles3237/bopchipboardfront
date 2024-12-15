@@ -4,8 +4,10 @@ import { AuthContext } from '../contexts/AuthContext';
 import { API_BASE_URL } from '../config';
 import './MonthlyGoal.css';
 
-function MonthlyGoal({ advisor, month, onUpdate, deliveredCount }) {
-  const [goal, setGoal] = useState(0);
+function MonthlyGoal({ advisor, month, onUpdate, deliveredCount, showGoalNumber }) {
+  const [goal, setGoal] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [tempGoal, setTempGoal] = useState(0);
   const { auth } = useContext(AuthContext);
@@ -17,17 +19,18 @@ function MonthlyGoal({ advisor, month, onUpdate, deliveredCount }) {
   const canEditGoal = auth?.user?.role === 'Admin' ||
                      auth?.user?.name === advisor;
 
-  const progressPercentage = goal > 0 ? Math.min((deliveredCount / goal) * 100, 100) : 0;
+  const progressPercentage = goal ? (deliveredCount / goal) * 100 : 0;
+  const progressColor = progressPercentage >= 100 ? 'var(--mini-green)' : 'var(--bmw-blue)';
 
   const handleClick = () => {
     if (canEditGoal) {
       setIsEditing(true);
+      setTempGoal(goal || 0);
     }
   };
 
   const fetchGoal = useCallback(async () => {
     try {
-      console.log('Fetching goal for:', advisor, month);
       const response = await axios.get(
         `${API_BASE_URL}/goals/${advisor}/${month}`,
         {
@@ -37,32 +40,24 @@ function MonthlyGoal({ advisor, month, onUpdate, deliveredCount }) {
           }
         }
       );
-      console.log('Goal fetch response:', response.data);
       setGoal(response.data.goal_count || 0);
       setTempGoal(response.data.goal_count || 0);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching goal:', error.response || error);
+      setError(error);
+      setLoading(false);
     }
   }, [advisor, month, auth.token]);
 
   useEffect(() => {
-    if (canViewGoal) {
-      fetchGoal();
-    }
-  }, [advisor, month, canViewGoal, fetchGoal]);
+    fetchGoal();
+  }, [advisor, month, fetchGoal]);
 
   const handleSave = async () => {
-    const url = `${API_BASE_URL}/goals`;
     try {
-      console.log('Attempting to save goal to:', url);
-      console.log('Goal data:', { 
-        advisor, 
-        month, 
-        goal_count: tempGoal
-      });
-
-      const response = await axios.post(
-        url,
+      await axios.post(
+        `${API_BASE_URL}/goals`,
         {
           advisor,
           month,
@@ -76,61 +71,54 @@ function MonthlyGoal({ advisor, month, onUpdate, deliveredCount }) {
         }
       );
 
-      console.log('Goal save response:', response.data);
       setGoal(tempGoal);
       setIsEditing(false);
       if (onUpdate) onUpdate();
     } catch (error) {
-      console.error('Error saving goal:', {
-        status: error.response?.status,
-        message: error.response?.data?.message,
-        url: url
-      });
+      console.error('Error saving goal:', error);
       alert(`Failed to save goal: ${error.response?.data?.message || error.message}`);
     }
   };
 
-  if (!canViewGoal) {
-    return null;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error loading goal</div>;
 
   return (
     <div className="monthly-goal">
+      <div className="goal-progress-bar">
+        <div 
+          className="progress-fill"
+          style={{ 
+            width: `${Math.min(progressPercentage, 100)}%`,
+            backgroundColor: progressColor,
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+          }}
+        />
+      </div>
       {isEditing ? (
         <div className="goal-edit">
           <input
             type="number"
-            value={tempGoal}
-            onChange={(e) => setTempGoal(Number(e.target.value))}
-            min="0"
             className="goal-input"
+            value={tempGoal}
+            onChange={(e) => setTempGoal(parseInt(e.target.value) || 0)}
+            min="0"
           />
-          <button onClick={handleSave} className="save-goal">Save</button>
-          <button onClick={() => setIsEditing(false)} className="cancel-goal">Cancel</button>
+          <button className="save-goal" onClick={handleSave}>✓</button>
+          <button className="cancel-goal" onClick={() => setIsEditing(false)}>✕</button>
         </div>
       ) : (
         <>
-          <div 
-            className="goal-display" 
-            onClick={handleClick}
-            title={canEditGoal ? "Click to edit goal" : undefined}
-            style={{ cursor: canEditGoal ? 'pointer' : 'default' }}
-          >
-            {goal}
-          </div>
-          <div className="advisor-progress-wrapper">
-            <div className="progress-container">
-              <div className="progress-bar">
-                <div 
-                  className="progress"
-                  style={{ 
-                    width: `${progressPercentage}%`,
-                    backgroundColor: progressPercentage >= 100 ? 'var(--mini-green)' : 'var(--bmw-blue)'
-                  }}
-                />
-              </div>
+          {showGoalNumber && goal !== null && (
+            <div className="goal-display" onClick={handleClick}>
+              <span className="goal-number">
+                {deliveredCount}/{goal}
+              </span>
             </div>
-          </div>
+          )}
+          {!showGoalNumber && (
+            <span className="goal-progress">{Math.round(progressPercentage)}%</span>
+          )}
         </>
       )}
     </div>

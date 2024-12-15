@@ -349,3 +349,29 @@ html, body, #root {
 .advisor-section:last-child {
   margin-bottom: 60px;
 }
+
+.monthly-goal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.goal-progress-bar {
+  width: 100px;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--bmw-blue);
+  transition: width 0.3s ease;
+}
+
+.goal-number, .goal-progress {
+  font-size: 0.8em;
+  color: var(--text-color);
+}
