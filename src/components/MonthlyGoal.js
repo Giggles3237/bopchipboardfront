@@ -109,15 +109,19 @@ function MonthlyGoal({ advisor, month, onUpdate, deliveredCount, showGoalNumber 
         </div>
       ) : (
         <>
-          {showGoalNumber && goal !== null && (
-            <div className="goal-display" onClick={handleClick}>
-              <span className="goal-number">
-                {deliveredCount}/{goal}
-              </span>
-            </div>
-          )}
-          {!showGoalNumber && (
-            <span className="goal-progress">{Math.round(progressPercentage)}%</span>
+          {canViewGoal && (
+            <>
+              {showGoalNumber && goal !== null && (
+                <div className="goal-display" onClick={handleClick}>
+                  <span className="goal-number">
+                    {deliveredCount}/{goal}
+                  </span>
+                </div>
+              )}
+              {!showGoalNumber && (
+                <span className="goal-progress">{Math.round(progressPercentage)}%</span>
+              )}
+            </>
           )}
         </>
       )}

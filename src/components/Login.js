@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
+import './Login.css';
 
 // Use Heroku URL directly
 const API_BASE_URL = 'https://bopchipboard-c66df77a754d.herokuapp.com/api';
