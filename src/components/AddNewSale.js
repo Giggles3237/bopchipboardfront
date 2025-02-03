@@ -4,8 +4,8 @@ import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://bopchipboard-c66df77a754d.herokuapp.com/api';
 console.log('API_BASE_URL initialized as:', API_BASE_URL);
 
 function AddNewSale() {
@@ -76,6 +76,7 @@ function AddNewSale() {
       );
 
       if (response.status === 201 || response.status === 200) {
+        window.dispatchEvent(new CustomEvent('salesUpdated'));
         alert('Sale added successfully!');
         navigate('/');
       }

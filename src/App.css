@@ -323,3 +323,50 @@ button:hover {
   margin: 0 auto;
   overflow-x: hidden;
 }
+
+.unified-search-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.unified-search-container h2 {
+  margin-bottom: 20px;
+  color: var(--text-color);
+}
+
+.results-table {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.results-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--background-color);
+}
+
+.results-table th,
+.results-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.results-table th {
+  background-color: var(--header-bg);
+  font-weight: 600;
+}
+
+.results-table tr:hover {
+  background-color: var(--hover-bg);
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clickable-row:hover {
+  background-color: var(--hover-bg);
+}

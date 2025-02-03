@@ -31,15 +31,25 @@ function AdminDashboard() {
 
     const fetchUsers = useCallback(async () => {
         try {
+            console.log('API Base URL:', API_BASE_URL);
+            console.log('Attempting to fetch users from:', `${API_BASE_URL}/users`);
             const response = await axios.get(`${API_BASE_URL}/users`, {
                 headers: { 
-                    'Authorization': `Bearer ${auth.token}`
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json'
                 }
             });
+            console.log('Users response:', response.data);
             setUsers(response.data);
             setError(null);
         } catch (err) {
-            setError('Error fetching users: ' + err.message);
+            console.error('Error details:', {
+                message: err.message,
+                response: err.response?.data,
+                status: err.response?.status,
+                endpoint: `${API_BASE_URL}/users`
+            });
+            setError(`Error fetching users: ${err.response?.data?.message || err.message}`);
         } finally {
             setLoading(false);
         }
@@ -100,12 +110,21 @@ function AdminDashboard() {
     const handleDelete = async (userId) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
-                await axios.delete(`${API_BASE_URL}/users/${userId}`, {
+                const response = await axios.delete(`${API_BASE_URL}/users/${userId}`, {
                     headers: { Authorization: `Bearer ${auth.token}` }
                 });
-                fetchUsers();
+                
+                if (response.status === 200) {
+                    setSuccess('User deleted successfully');
+                    fetchUsers();
+                }
             } catch (err) {
-                setError('Error deleting user: ' + err.message);
+                console.error('Error deleting user:', {
+                    message: err.message,
+                    response: err.response?.data,
+                    status: err.response?.status
+                });
+                setError(err.response?.data?.message || 'Error deleting user. Please try again.');
             }
         }
     };
@@ -116,6 +135,11 @@ function AdminDashboard() {
                 alert('Please enter both month and goal value');
                 return;
             }
+
+            console.log('Submitting team goal:', {
+                month: selectedMonth,
+                goal_count: parseInt(teamGoal)
+            });
 
             const response = await axios.post(
                 `${API_BASE_URL}/goals/team`,
@@ -130,6 +154,8 @@ function AdminDashboard() {
                     }
                 }
             );
+
+            console.log('Goal submission response:', response.data);
 
             if (response.data) {
                 alert('Team goal saved successfully');
@@ -149,6 +175,8 @@ function AdminDashboard() {
     const fetchCurrentMonthGoal = useCallback(async () => {
         try {
             const currentMonth = format(new Date(), 'yyyy-MM');
+            console.log('Fetching goal for month:', currentMonth);
+            
             const response = await axios.get(
                 `${API_BASE_URL}/goals/team/${currentMonth}`,
                 {
@@ -159,8 +187,10 @@ function AdminDashboard() {
                 }
             );
             
+            console.log('Goal response:', response.data);
+            
             if (response.data === null || response.data === undefined) {
-                console.warn('AdminDashboard - No data received from team goal endpoint');
+                console.warn('No data received from team goal endpoint');
                 setCurrentMonthGoal(0);
                 return;
             }
@@ -171,6 +201,8 @@ function AdminDashboard() {
         } catch (error) {
             console.error('Error fetching current month goal:', {
                 message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
                 url: `${API_BASE_URL}/goals/team/${format(new Date(), 'yyyy-MM')}`
             });
             setCurrentMonthGoal(0);

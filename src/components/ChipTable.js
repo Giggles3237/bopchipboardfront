@@ -30,7 +30,8 @@ function ChipTable({ sales = [], onEdit }) {
           name: sale.advisor, 
           delivered: 0, 
           pending: 0,
-          isHouse: sale.advisor.toLowerCase().includes('house') 
+          isHouse: sale.advisor.toLowerCase().includes('house'),
+          isCurrentUser: sale.advisor === auth?.user?.name
         };
       }
       if (sale.delivered) {
@@ -42,6 +43,12 @@ function ChipTable({ sales = [], onEdit }) {
     }, {});
 
     return Object.values(advisorStats).sort((a, b) => {
+      // If user is a salesperson, put them at the top
+      if (auth?.user?.role === 'Salesperson') {
+        if (a.isCurrentUser) return -1;
+        if (b.isCurrentUser) return 1;
+      }
+      
       // Always put house at the bottom
       if (a.isHouse) return 1;
       if (b.isHouse) return -1;
@@ -49,7 +56,7 @@ function ChipTable({ sales = [], onEdit }) {
       // Sort others by total sales
       return (b.delivered + b.pending) - (a.delivered + a.pending);
     });
-  }, [sales]);
+  }, [sales, auth?.user?.name, auth?.user?.role]);
 
   const fetchGoals = useCallback(async () => {
     try {
@@ -145,6 +152,8 @@ function ChipTable({ sales = [], onEdit }) {
           </div>
         </div>
       ))}
+      
+      <div style={{ height: '60px' }} aria-hidden="true"></div>
     </div>
   );
 }

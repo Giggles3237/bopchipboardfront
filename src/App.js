@@ -22,6 +22,7 @@ import ChangePasswordForm from './components/ChangePasswordForm';
 import './App.css';
 import SalespersonDashboard from './components/SalespersonDashboard';
 import ErrorBoundary from './components/ErrorBoundary';
+import SearchUnifiedVehicles from './components/SearchUnifiedVehicles';
 
 /**
  * App Component
@@ -222,8 +223,7 @@ function App() {
             'Authorization': `Bearer ${auth.token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
-          },
-          withCredentials: true
+          }
         }
       );
 
@@ -252,6 +252,36 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    const handleSalesUpdate = async () => {
+      if (!auth?.token) return;
+      
+      try {
+        // Clear the cache to ensure fresh data
+        apiService.clearCache();
+        
+        // Fetch fresh data
+        const data = await apiService.fetchWithCache('/sales', auth.token);
+        setSales(data);
+        
+        // Update filtered sales if needed
+        const filtered = data.filter(sale => {
+          const saleDate = new Date(sale.deliveryDate);
+          return saleDate >= startDate && saleDate <= endDate;
+        });
+        setFilteredSales(filtered);
+      } catch (error) {
+        console.error('Error refreshing sales data:', error);
+      }
+    };
+
+    window.addEventListener('salesUpdated', handleSalesUpdate);
+    
+    return () => {
+      window.removeEventListener('salesUpdated', handleSalesUpdate);
+    };
+  }, [auth?.token, startDate, endDate]);
+
   return (
     <Router>
       <ErrorBoundary>
@@ -261,6 +291,12 @@ function App() {
           {error && <p className="error-message">{error}</p>}
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/unified-search" element={
+              <PrivateRoute>
+                <ViewToggleBar />
+                <SearchUnifiedVehicles />
+              </PrivateRoute>
+            } />
             <Route path="/inbound" element={
               <PrivateRoute>
                 <Inbound handleSaleUpdate={handleSaleUpdate} />

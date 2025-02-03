@@ -15,6 +15,7 @@ import {
   ComposedChart
 } from 'recharts';
 import './SalespersonDashboard.css';
+import ViewToggleBar from './ViewToggleBar';
 
 const calculateWorkingDays = (startDate, endDate) => {
   let count = 0;
@@ -52,6 +53,7 @@ function SalespersonDashboard() {
     isEndOfMonth: false
   });
   const [pendingSales, setPendingSales] = useState(0);
+  const [selectedView, setSelectedView] = useState('sales');
 
   // Fetch list of advisors for admin dropdown
   useEffect(() => {
@@ -182,17 +184,34 @@ function SalespersonDashboard() {
 
   const calculateYearlyStats = (sales) => {
     const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+
+    // Get sales from last 12 months excluding current month
+    const last12MonthsSales = sales.filter(sale => {
+      const saleDate = new Date(sale.deliveryDate);
+      const monthsAgo = (currentYear - saleDate.getFullYear()) * 12 + (currentMonth - saleDate.getMonth());
+      return monthsAgo > 0 && monthsAgo <= 12;
+    });
+
+    // Calculate all-time monthly totals
+    const monthlyTotals = {};
+    const typeCount = {};
+
+    // Calculate current year totals for YTD and type counts
     const currentYearSales = sales.filter(sale => 
       new Date(sale.deliveryDate).getFullYear() === currentYear
     );
 
-    const monthlyTotals = {};
-    const typeCount = {};
-
+    // Split the calculations:
+    // 1. Current year sales for YTD and type counts
     currentYearSales.forEach(sale => {
+      typeCount[sale.type] = (typeCount[sale.type] || 0) + 1;
+    });
+
+    // 2. All sales for best month calculation
+    sales.forEach(sale => {
       const month = format(new Date(sale.deliveryDate), 'MMMM yyyy');
       monthlyTotals[month] = (monthlyTotals[month] || 0) + 1;
-      typeCount[sale.type] = (typeCount[sale.type] || 0) + 1;
     });
 
     const bestMonth = Object.entries(monthlyTotals)
@@ -201,22 +220,26 @@ function SalespersonDashboard() {
         { month: '', count: 0 }
       );
 
-    // Calculate months elapsed in current year
-    const currentMonth = new Date().getMonth() + 1; // +1 because months are 0-based
-
     setYearlyStats({
       totalSales: currentYearSales.length,
-      averagePerMonth: (currentYearSales.length / currentMonth).toFixed(1),
+      averagePerMonth: (last12MonthsSales.length / 12).toFixed(1),
       bestMonth,
       byType: typeCount
     });
   };
 
   const chartData = Array.from({ length: 12 }, (_, i) => {
-    const date = subMonths(new Date(), 11 - i);
+    // Start from last month instead of current month
+    const date = subMonths(new Date(), 12 - i);
     const monthStr = format(date, 'MMM yyyy');
     const lastYearDate = subMonths(date, 12);
     const lastYearStr = format(lastYearDate, 'MMM yyyy');
+    
+    // Skip if it's the current month
+    const isCurrentMonth = format(new Date(), 'MMM yyyy') === monthStr;
+    if (isCurrentMonth) {
+      return null;
+    }
     
     const currentSales = salesData.filter(sale => 
       format(new Date(sale.deliveryDate), 'MMM yyyy') === monthStr
@@ -243,7 +266,7 @@ function SalespersonDashboard() {
       teamAverage: Math.round(teamAvg * 10) / 10,
       topPerformer
     };
-  });
+  }).filter(Boolean); // Remove null entries
 
   console.log('Chart Data:', chartData);
 
@@ -270,97 +293,123 @@ function SalespersonDashboard() {
           </div>
         )}
       </div>
-      
-      {/* Current Month Progress */}
-      <div className="current-month-card">
-        <h2>Current Month Progress</h2>
-        <div className="progress-stats">
-          <div className="stat">
-            <span className="label">Current</span>
-            <span className="value">{monthPace.current}</span>
-          </div>
-          <div className="stat">
-            <span className="label">Pending</span>
-            <span className="value">{pendingSales}</span>
-          </div>
-          <div className="stat">
-            <span className="label">Daily Pace</span>
-            <span className="value">
-              {(monthPace.current / calculateWorkingDays(startOfMonth(new Date()), new Date())).toFixed(1)}
-            </span>
-          </div>
-          <div className="stat">
-            <span className="label">Projected</span>
-            <span className="value">{monthPace.projected}</span>
-            {monthPace.isEndOfMonth && <span className="subtitle">🔥</span>}
-          </div>
-        </div>
-        <div className="progress-bar">
-          <div 
-            className="progress" 
-            style={{ 
-              width: `${Math.min((monthPace.projected / monthlyGoal) * 100, 100)}%`,
-              backgroundColor: monthPace.projected >= monthlyGoal ? 'var(--mini-green)' : 'var(--bmw-blue)'
-            }}
-          />
-        </div>
-        <div className="pace-indicator">
-          <small>
-            Goal: {monthlyGoal} | Days Left: {monthPace.daysLeft}
-            {monthPace.isEndOfMonth && " (End of Month Surge Active)"}
-          </small>
-        </div>
-      </div>
 
-      {/* Sales History Chart */}
-      <div className="chart-card">
-        <h2>Sales History</h2>
-        <ResponsiveContainer width="100%" height={400}>
-          <ComposedChart data={chartData}>
-            <CartesianGrid stroke="#E6E6E6" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar type="monotone" dataKey="teamAverage" fill="#1C69D4" name="Team Average" />
-            <Line type="linear" dataKey="topPerformer" dot={{ r: 6, symbol: "star" }} fill="#4E8DCD" name="Top Performer" />
-            <Line type="linear" dataKey="sales" stroke="#000000" strokeWidth={2} name="Current Year" />
-            <Line type="linear" dataKey="priorYear" stroke="#666666" strokeWidth={1} name="Prior Year" />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      <ViewToggleBar 
+        views={[
+          { id: 'sales', label: 'Sales' },
+          { id: 'inventory', label: 'Inventory' },
+          { id: 'leads', label: 'Leads' }
+        ]}
+        selectedView={selectedView}
+        onViewChange={setSelectedView}
+      />
 
-      {/* Year to Date Stats */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Year to Date</h3>
-          <div className="big-number">{yearlyStats.totalSales}</div>
-          <div className="subtitle">Total Sales</div>
-        </div>
-        <div className="stat-card">
-          <h3>Monthly Average</h3>
-          <div className="big-number">{yearlyStats.averagePerMonth}</div>
-          <div className="subtitle">Sales per Month</div>
-        </div>
-        <div className="stat-card">
-          <h3>Best Month</h3>
-          <div className="big-number">{yearlyStats.bestMonth.count}</div>
-          <div className="subtitle">{yearlyStats.bestMonth.month}</div>
-        </div>
-      </div>
-
-      {/* Sales by Type */}
-      <div className="sales-by-type">
-        <h2>Sales by Type</h2>
-        <div className="type-grid">
-          {Object.entries(yearlyStats.byType).map(([type, count]) => (
-            <div key={type} className="type-card">
-              <div className="type-name">{type}</div>
-              <div className="type-count">{count}</div>
+      {selectedView === 'sales' && (
+        <>
+          {/* Current Month Progress */}
+          <div className="current-month-card">
+            <h2>Current Month Progress</h2>
+            <div className="progress-stats">
+              <div className="stat">
+                <span className="label">Current</span>
+                <span className="value">{monthPace.current}</span>
+              </div>
+              <div className="stat">
+                <span className="label">Pending</span>
+                <span className="value">{pendingSales}</span>
+              </div>
+              <div className="stat">
+                <span className="label">Daily Pace</span>
+                <span className="value">
+                  {(monthPace.current / calculateWorkingDays(startOfMonth(new Date()), new Date())).toFixed(1)}
+                </span>
+              </div>
+              <div className="stat">
+                <span className="label">Projected</span>
+                <span className="value">{monthPace.projected}</span>
+                {monthPace.isEndOfMonth && <span className="subtitle">🔥</span>}
+              </div>
             </div>
-          ))}
+            <div className="progress-bar">
+              <div 
+                className="progress" 
+                style={{ 
+                  width: `${Math.min((monthPace.projected / monthlyGoal) * 100, 100)}%`,
+                  backgroundColor: monthPace.projected >= monthlyGoal ? 'var(--mini-green)' : 'var(--bmw-blue)'
+                }}
+              />
+            </div>
+            <div className="pace-indicator">
+              <small>
+                Goal: {monthlyGoal} | Days Left: {monthPace.daysLeft}
+                {monthPace.isEndOfMonth && " (End of Month Surge Active)"}
+              </small>
+            </div>
+          </div>
+
+          {/* Sales History Chart */}
+          <div className="chart-card">
+            <h2>Sales History</h2>
+            <ResponsiveContainer width="100%" height={400}>
+              <ComposedChart data={chartData}>
+                <CartesianGrid stroke="#E6E6E6" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar type="monotone" dataKey="teamAverage" fill="#1C69D4" name="Team Average" />
+                <Line type="linear" dataKey="topPerformer" dot={{ r: 6, symbol: "star" }} fill="#4E8DCD" name="Top Performer" />
+                <Line type="linear" dataKey="sales" stroke="#000000" strokeWidth={2} name="Current Year" />
+                <Line type="linear" dataKey="priorYear" stroke="#666666" strokeWidth={1} name="Prior Year" />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Year to Date Stats */}
+          <div className="stats-grid">
+            <div className="stat-card">
+              <h3>Year to Date</h3>
+              <div className="big-number">{yearlyStats.totalSales}</div>
+              <div className="subtitle">Total Sales</div>
+            </div>
+            <div className="stat-card">
+              <h3>Monthly Average</h3>
+              <div className="big-number">{yearlyStats.averagePerMonth}</div>
+              <div className="subtitle">Sales per Month</div>
+            </div>
+            <div className="stat-card">
+              <h3>Best Month</h3>
+              <div className="big-number">{yearlyStats.bestMonth.count}</div>
+              <div className="subtitle">{yearlyStats.bestMonth.month}</div>
+            </div>
+          </div>
+
+          {/* Sales by Type */}
+          <div className="sales-by-type">
+            <h2>Sales by Type</h2>
+            <div className="type-grid">
+              {Object.entries(yearlyStats.byType).map(([type, count]) => (
+                <div key={type} className="type-card">
+                  <div className="type-name">{type}</div>
+                  <div className="type-count">{count}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+      
+      {selectedView === 'inventory' && (
+        <div className="inventory-view">
+          <h2>Inventory View Coming Soon</h2>
         </div>
-      </div>
+      )}
+      
+      {selectedView === 'leads' && (
+        <div className="leads-view">
+          <h2>Leads View Coming Soon</h2>
+        </div>
+      )}
     </div>
   );
 }

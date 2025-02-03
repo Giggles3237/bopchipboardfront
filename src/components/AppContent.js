@@ -48,6 +48,28 @@ function AppContent() {
     fetchSales();
   }, [auth?.token]);
 
+  useEffect(() => {
+    const handleSalesUpdate = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/sales`, {
+          headers: {
+            'Authorization': `Bearer ${auth.token}`
+          }
+        });
+        setSales(response.data);
+        setFilteredSales(response.data);
+      } catch (error) {
+        console.error('Error refreshing sales data:', error);
+      }
+    };
+
+    window.addEventListener('salesUpdated', handleSalesUpdate);
+    
+    return () => {
+      window.removeEventListener('salesUpdated', handleSalesUpdate);
+    };
+  }, [auth.token]);
+
   const handleToggleTheme = () => {
     setIsDarkMode(prev => !prev);
   };
