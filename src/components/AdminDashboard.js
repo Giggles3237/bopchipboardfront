@@ -69,6 +69,9 @@ function AdminDashboard() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        
+        console.log('Sending form data:', formData);
+        
         try {
             if (editingUser) {
                 await axios.put(`${API_BASE_URL}/users/${editingUser.id}`, formData, {
@@ -76,9 +79,10 @@ function AdminDashboard() {
                 });
                 setSuccess('User updated successfully');
             } else {
-                await axios.post(`${API_BASE_URL}/users`, formData, {
+                const response = await axios.post(`${API_BASE_URL}/users`, formData, {
                     headers: { Authorization: `Bearer ${auth.token}` }
                 });
+                console.log('Server response:', response.data);
                 setSuccess('User added successfully');
             }
             fetchUsers();
@@ -87,7 +91,8 @@ function AdminDashboard() {
             setShowAddForm(false);
             setError(null);
         } catch (err) {
-            setError('Error saving user: ' + err.message);
+            console.error('Error details:', err.response?.data || err.message);
+            setError('Error saving user: ' + (err.response?.data?.message || err.response?.data?.error || err.message));
             setSuccess('');
         } finally {
             setIsSubmitting(false);
