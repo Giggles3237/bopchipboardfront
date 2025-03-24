@@ -76,6 +76,22 @@ function AddNewSale() {
       );
 
       if (response.status === 201 || response.status === 200) {
+        // Send Teams notification
+        try {
+          await axios.post(`${API_BASE_URL}/notifications/teams`, {
+            sale: saleToSubmit,
+            user: auth.user.name
+          }, {
+            headers: {
+              'Authorization': `Bearer ${auth.token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+        } catch (notificationError) {
+          console.error('Failed to send Teams notification:', notificationError);
+          // Don't block the main flow if notification fails
+        }
+
         window.dispatchEvent(new CustomEvent('salesUpdated'));
         alert('Sale added successfully!');
         navigate('/');

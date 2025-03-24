@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,6 +13,17 @@ import './ChipTable.css';
  */
 function ChipTable({ sales = [], onEdit }) {
   const { auth } = useAuth();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Add responsive handler
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const isManagerOrAdmin = auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager';
 
@@ -20,7 +31,8 @@ function ChipTable({ sales = [], onEdit }) {
     isManagerOrAdmin,
     userRole: auth?.user?.role,
     hasAuth: !!auth,
-    hasSales: sales.length
+    hasSales: sales.length,
+    isMobile
   });
 
   const sortedAdvisors = useMemo(() => {
@@ -109,7 +121,7 @@ function ChipTable({ sales = [], onEdit }) {
   };
 
   return (
-    <div className="chip-table">
+    <div className={`chip-table ${isMobile ? 'mobile-view' : ''}`}>
       {isManagerOrAdmin && (
         <Totals sales={sales} />
       )}
@@ -152,6 +164,19 @@ function ChipTable({ sales = [], onEdit }) {
           </div>
         </div>
       ))}
+      
+      {isMobile && (
+        <div className="mobile-info">
+          <div className="legend">
+            <div className="legend-item">
+              <span className="legend-color delivered"></span> Delivered
+            </div>
+            <div className="legend-item">
+              <span className="legend-color pending"></span> Pending
+            </div>
+          </div>
+        </div>
+      )}
       
       <div style={{ height: '60px' }} aria-hidden="true"></div>
     </div>

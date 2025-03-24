@@ -306,22 +306,83 @@ html, body, #root {
 }
 
 @media (max-width: 768px) {
-  .chips {
-    grid-template-columns: repeat(3, 1fr);
+  .chip-table {
+    width: 98%;
+    padding-bottom: 80px;
   }
   
-  .advisor-section {
-    padding: 16px;
+  .chips {
+    display: block;
+    gap: 0;
+  }
+  
+  .chip-component {
+    width: 100%;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    height: auto;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    transform: rotate(0deg) !important;
+    opacity: 1 !important;
+  }
+  
+  .chip-component.pending {
+    border-left: 4px solid #FFA500;
+  }
+  
+  .chip-component.delivered {
+    border-left: 4px solid #28a745;
+  }
+  
+  .stock-number {
+    font-size: 14px;
+  }
+  
+  /* Add visible info directly in the chip instead of tooltips */
+  .chip-component::after {
+    content: attr(data-vehicle-info);
+    font-size: 12px;
+    display: block;
+    margin-left: auto;
+    max-width: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .advisor-name {
+    padding: 12px;
+  }
+  
+  .advisor-stats {
+    margin-left: 12px;
+  }
+
+  .tooltip {
+    display: none !important;
   }
 }
 
 @media (max-width: 576px) {
-  .chips {
-    grid-template-columns: repeat(2, 1fr);
+  .advisor-name h3 {
+    font-size: 14px;
+    flex-direction: column;
+    align-items: flex-start;
   }
   
-  .chip-table {
-    padding: 12px;
+  .advisor-stats {
+    margin-left: 0;
+    margin-top: 4px;
+  }
+  
+  .totals-container {
+    flex-direction: column;
+  }
+  
+  .totals-left, .totals-right {
+    width: 100%;
   }
 }
 
@@ -381,4 +442,85 @@ html, body, #root {
 .goal-number, .goal-progress {
   font-size: 0.8em;
   color: var(--text-color);
+}
+
+/* Mobile Legend Styles */
+.mobile-info {
+  margin: 20px auto;
+  padding: 10px 15px;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.night-mode .mobile-info {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+}
+
+.legend-color.delivered {
+  background-color: #28a745;
+}
+
+.legend-color.pending {
+  background-color: #FFA500;
+}
+
+/* Additional Mobile Optimizations */
+@media (max-width: 768px) {
+  .chip-table.mobile-view {
+    width: 100%;
+    padding: 10px;
+  }
+  
+  .advisor-section {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  
+  .night-mode .advisor-section {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+  
+  .advisor-name {
+    background-color: transparent;
+    padding: 10px 0;
+  }
+  
+  .monthly-goal {
+    margin-left: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .advisor-stats {
+    flex-wrap: wrap;
+  }
+  
+  .totals-container {
+    padding: 8px;
+  }
+  
+  .total-item {
+    margin: 4px 0;
+  }
 }

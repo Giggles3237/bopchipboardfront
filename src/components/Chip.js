@@ -68,6 +68,10 @@ function Chip({ sale, onEdit }) {
     setIsHovered(false);
   };
 
+  // Format vehicle info for mobile view
+  const vehicleInfo = `${sale.color} ${sale.year} ${sale.make} ${sale.model}`;
+  const clientInfo = formatClientName(sale.clientName);
+
   return (
     <div 
       className={`chip-component ${getChipClass()}`}
@@ -76,14 +80,16 @@ function Chip({ sale, onEdit }) {
       onClick={isEditable ? () => onEdit(sale) : undefined}
       ref={chipRef}
       style={{ cursor: isEditable ? 'pointer' : 'default' }}
+      data-vehicle-info={vehicleInfo}
+      data-client-info={clientInfo}
     >
       <span className="stock-number">
         {sale.stockNumber}
         {(sale.type === 'CPO BMW' || sale.type === 'CPO MINI') && <span className="gold-star">★</span>}
       </span>
       <Tooltip visible={isHovered} position={tooltipPosition}>
-        <p>{`${sale.color} ${sale.year} ${sale.make} ${sale.model}`}</p>
-        <p>{formatClientName(sale.clientName)}</p>
+        <p>{vehicleInfo}</p>
+        <p>{clientInfo}</p>
       </Tooltip>
     </div>
   );

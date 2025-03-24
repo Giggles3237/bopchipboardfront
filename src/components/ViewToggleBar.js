@@ -1,12 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './ViewToggleBar.css';
 
 const ViewToggleBar = () => {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 480;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const mobileMenuClass = isMobile 
+    ? (isMobileMenuOpen ? 'mobile-menu-expanded' : 'mobile-menu-collapsed')
+    : '';
 
   return (
-    <div className="view-toggle-bar">
+    <div className={`view-toggle-bar ${mobileMenuClass}`}>
+      {isMobile && (
+        <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+          {isMobileMenuOpen ? 'Hide Menu ▲' : 'View Options ▼'}
+        </button>
+      )}
       <div className="left-buttons">
         <Link to="/" className={location.pathname === '/' ? 'view-button active' : 'view-button'}>
           Chip View

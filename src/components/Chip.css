@@ -134,3 +134,73 @@
 .tooltip.visible {
   opacity: 1;
 }
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .chip-component {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: auto;
+    min-height: 32px;
+    width: 100%;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  
+  .chip-component::after {
+    content: attr(data-vehicle-info);
+    margin-left: 12px;
+    font-size: 11px;
+    color: inherit;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60%;
+  }
+  
+  .chip-component.delivered {
+    border-left: 3px solid #28a745;
+  }
+  
+  .chip-component.pending {
+    border-left: 3px solid #FFA500;
+  }
+  
+  .chip-component:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .night-mode .chip-component:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .chip-component.new-bmw,
+  .chip-component.new-mini,
+  .chip-component.used-cpo,
+  .chip-component.default {
+    border-radius: 4px;
+  }
+  
+  .tooltip {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chip-component::after {
+    max-width: 50%;
+  }
+  
+  .stock-number {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+  }
+}
