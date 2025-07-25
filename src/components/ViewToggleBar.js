@@ -48,9 +48,6 @@ const ViewToggleBar = () => {
         <Link to="/salesperson-dashboard" className={location.pathname === '/salesperson-dashboard' ? 'view-button active' : 'view-button'}>
           Dashboard
         </Link>
-        <Link to="/unified-search" className={location.pathname === '/unified-search' ? 'view-button active' : 'view-button'}>
-          Vehicle Search
-        </Link>
       </div>
       <div className="right-buttons">
         <Link to="/add-sale" className={location.pathname === '/add-sale' ? 'view-button active' : 'view-button'}>
