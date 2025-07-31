@@ -133,10 +133,47 @@ function SalesTable({ sales, onEdit, onDelete }) {
     setCurrentPage(selectedItem.selected + 1);
   };
 
+  const handleExport = () => {
+    const isAdmin = auth?.user?.role === 'Admin';
+    
+    // Create CSV content
+    const headers = [
+      'Stock Number', 'Client Name', 'Year', 'Make', 'Model', 
+      'Color', 'Advisor', 'Delivered', 'Delivery Date', 'Type'
+    ];
+    
+    const csvContent = [
+      headers.join(','),
+      ...filteredData.map(sale => [
+        formatStockNumber(sale.stockNumber),
+        isAdmin ? formatClientName(sale.clientName, sale.advisor) : '***',
+        sale.year,
+        formatMake(sale.make),
+        formatProperCase(sale.model),
+        formatProperCase(sale.color),
+        formatProperCase(sale.advisor),
+        sale.delivered ? 'Yes' : 'No',
+        sale.deliveryDate ? new Date(sale.deliveryDate).toLocaleDateString() : '',
+        sale.type
+      ].join(','))
+    ].join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `sales_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="sales-table-container">
       <div className="filtered-results">
-        Showing {filteredData.length} of {sales.length} total sales
+        <span>Showing {filteredData.length} of {sales.length} total sales</span>
       </div>
       <table className="sales-table">
         <thead>
@@ -194,26 +231,38 @@ function SalesTable({ sales, onEdit, onDelete }) {
         </tbody>
       </table>
 
-      <ReactPaginate
-        previousLabel="Previous"
-        nextLabel="Next"
-        breakLabel="..."
-        pageCount={totalPages}
-        marginPagesDisplayed={2}
-        pageRangeDisplayed={5}
-        onPageChange={handlePageChange}
-        containerClassName="pagination"
-        pageClassName="pagination-item"
-        pageLinkClassName="pagination-link"
-        previousClassName="pagination-item"
-        previousLinkClassName="pagination-link"
-        nextClassName="pagination-item"
-        nextLinkClassName="pagination-link"
-        breakClassName="pagination-item"
-        breakLinkClassName="pagination-link"
-        activeClassName="active"
-        forcePage={currentPage - 1}
-      />
+      <div className="pagination-container">
+        <ReactPaginate
+          previousLabel="Previous"
+          nextLabel="Next"
+          breakLabel="..."
+          pageCount={totalPages}
+          marginPagesDisplayed={2}
+          pageRangeDisplayed={5}
+          onPageChange={handlePageChange}
+          containerClassName="pagination"
+          pageClassName="pagination-item"
+          pageLinkClassName="pagination-link"
+          previousClassName="pagination-item"
+          previousLinkClassName="pagination-link"
+          nextClassName="pagination-item"
+          nextLinkClassName="pagination-link"
+          breakClassName="pagination-item"
+          breakLinkClassName="pagination-link"
+          activeClassName="active"
+          forcePage={currentPage - 1}
+        />
+        
+        {isManagerOrAdmin && (
+          <button 
+            className="export-button"
+            onClick={handleExport}
+            title="Export to CSV"
+          >
+            ⬇️
+          </button>
+        )}
+      </div>
     </div>
   );
 }

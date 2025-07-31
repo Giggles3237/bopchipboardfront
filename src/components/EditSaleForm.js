@@ -4,12 +4,20 @@ import 'react-datepicker/dist/react-datepicker.css';
 import './EditSaleForm.css';
 import { AuthContext } from '../contexts/AuthContext';
 import axios from 'axios';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://bopchipboard-c66df77a754d.herokuapp.com/api';
+import { API_BASE_URL } from '../config';
 
 function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
   const { auth } = useContext(AuthContext);
   const [salespeople, setSalespeople] = useState([]);
+  const [showGetReady, setShowGetReady] = useState(false);
+  const [getReadyData, setGetReadyData] = useState({
+    location: 'annex',
+    miles: '',
+    instructions: [],
+    comments: '',
+    promiseTime: '14:00',
+    getReadyDate: new Date().toISOString().split('T')[0]
+  });
 
   // Add useEffect to fetch salespeople
   useEffect(() => {
@@ -73,6 +81,13 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
     }));
   };
 
+  const handleGetReadyDateChange = (date) => {
+    setGetReadyData(prevData => ({
+      ...prevData,
+      getReadyDate: date
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('EditSaleForm: Starting form submission');
@@ -111,6 +126,67 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
     onCancel();
   };
 
+  const handleGetReadyToggle = () => {
+    setShowGetReady(!showGetReady);
+  };
+
+  const handleGetReadyChange = (e) => {
+    const { name, value, type } = e.target;
+    setGetReadyData(prevData => ({
+      ...prevData,
+      [name]: type === 'checkbox' ? value : value
+    }));
+  };
+
+  const handleInstructionChange = (instruction) => {
+    setGetReadyData(prevData => ({
+      ...prevData,
+      instructions: prevData.instructions.includes(instruction)
+        ? prevData.instructions.filter(item => item !== instruction)
+        : [...prevData.instructions, instruction]
+    }));
+  };
+
+  const handleSendGetReady = async () => {
+    try {
+      const dueDate = getReadyData.getReadyDate instanceof Date 
+        ? getReadyData.getReadyDate.toLocaleDateString()
+        : new Date(getReadyData.getReadyDate).toLocaleDateString();
+      
+      const promiseTime = getReadyData.promiseTime || '2:00 PM';
+      
+      const getReadyEmailData = {
+        getReadyId: formData.stockNumber,
+        dueBy: `${dueDate} at ${promiseTime}`,
+        chassis: formData.chassis || '',
+        vehicle: `${formData.model} ${formData.color}`,
+        location: getReadyData.location,
+        miles: getReadyData.miles,
+        itemsNeeded: getReadyData.instructions,
+        additionalAction: 'Check for Open Campaigns',
+        comments: getReadyData.comments,
+        customerName: formData.clientName,
+        salesperson: formData.advisor,
+        submittedBy: auth?.user?.name || ''
+      };
+
+      const response = await axios.post(`${API_BASE_URL}/getready/send-email`, getReadyEmailData, {
+        headers: {
+          'Authorization': `Bearer ${auth.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 200) {
+        alert('Get Ready email sent successfully!');
+        setShowGetReady(false);
+      }
+    } catch (error) {
+      console.error('Error sending Get Ready email:', error);
+      alert(`Error sending Get Ready email: ${error.message}`);
+    }
+  };
+
   const handleDelete = async () => {
     if (!onDelete) {
       console.warn('Delete functionality not available');
@@ -135,6 +211,22 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
     'New MINI',
     'CPO MINI',
     'Used MINI'
+  ];
+
+  const instructionOptions = [
+    'Fuel',
+    'Fluff',
+    'CPO',
+    'Check for Retail',
+    'PDI',
+    'Safety Check',
+    'State and Emissions',
+    'Cilajet',
+    'Body Estimate',
+    'Wholesale - Check for recalls',
+    'Maintenance',
+    'Prep for PPF',
+    'Other'
   ];
 
   console.log('onSubmit:', onSubmit);
@@ -255,6 +347,7 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
               required
             />
           </div>
+
           <div>
             <label htmlFor="type">Type:</label>
             <select
@@ -270,6 +363,110 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
               ))}
             </select>
           </div>
+
+          {/* Get Ready Section */}
+          {!formData.delivered && (
+            <div className="get-ready-section">
+              <button 
+                type="button" 
+                className="toggle-get-ready-button"
+                onClick={handleGetReadyToggle}
+              >
+                Get Ready
+              </button>
+              
+              {showGetReady && (
+                <div className="get-ready-fields">
+                  <div>
+                    <label htmlFor="getReadyLocation">Location:</label>
+                    <input
+                      type="text"
+                      id="getReadyLocation"
+                      name="location"
+                      value={getReadyData.location}
+                      onChange={handleGetReadyChange}
+                      placeholder="Enter location"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="getReadyDate">Get Ready Date:</label>
+                    <DatePicker
+                      selected={getReadyData.getReadyDate instanceof Date ? getReadyData.getReadyDate : new Date(getReadyData.getReadyDate)}
+                      onChange={handleGetReadyDateChange}
+                      dateFormat="yyyy-MM-dd"
+                      id="getReadyDate"
+                      name="getReadyDate"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="getReadyMiles">Miles:</label>
+                    <input
+                      type="number"
+                      id="getReadyMiles"
+                      name="miles"
+                      value={getReadyData.miles}
+                      onChange={handleGetReadyChange}
+                      placeholder="Enter miles"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label>Instructions:</label>
+                    <div className="instructions-grid">
+                      {instructionOptions.map((instruction) => (
+                        <div key={instruction} className="instruction-item">
+                          <input
+                            type="checkbox"
+                            id={`getReady-${instruction}`}
+                            checked={getReadyData.instructions.includes(instruction)}
+                            onChange={() => handleInstructionChange(instruction)}
+                          />
+                          <label htmlFor={`getReady-${instruction}`}>{instruction}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="getReadyComments">Comments:</label>
+                    <textarea
+                      id="getReadyComments"
+                      name="comments"
+                      value={getReadyData.comments}
+                      onChange={handleGetReadyChange}
+                      placeholder="Enter comments"
+                      rows="3"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="getReadyPromiseTime">Promise Time:</label>
+                    <input
+                      type="time"
+                      id="getReadyPromiseTime"
+                      name="promiseTime"
+                      value={getReadyData.promiseTime}
+                      onChange={handleGetReadyChange}
+                    />
+                  </div>
+                  
+                  <div className="get-ready-buttons">
+                    <button 
+                      type="button" 
+                      className="send-get-ready-button"
+                      onClick={handleSendGetReady}
+                    >
+                      Send Get Ready Email
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="form-buttons">
             <button type="submit" className="save-button">Save Changes</button>
             {sale.id && !formData.delivered && ( // Only show delete button for existing, undelivered sales
