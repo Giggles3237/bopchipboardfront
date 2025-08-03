@@ -19,7 +19,7 @@ function Header({ isDarkMode, onToggleTheme }) {
       <Container>
         <Navbar.Brand as={Link} to="/">
           <img 
-            src="/assets/images/logo.png"
+            src="/assets/images/logo.png?v=1"
             alt="BOP Chips Logo"
             className="header-logo"
           />
@@ -32,7 +32,7 @@ function Header({ isDarkMode, onToggleTheme }) {
             {auth?.user?.role === 'Admin' && (
               <Nav.Link as={Link} to="/admin">Admin Dashboard</Nav.Link>
             )}
-            {auth?.user?.role === 'Manager' && (
+            {(auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager') && (
               <Nav.Link as={Link} to="/manager">Manager Dashboard</Nav.Link>
             )}
             {auth?.user?.role === 'Salesperson' && (

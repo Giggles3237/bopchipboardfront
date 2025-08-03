@@ -4,6 +4,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import './AdminDashboard.css';
 import { format } from 'date-fns';
 import { API_BASE_URL } from '../config';
+import TrainingBadges from './TrainingBadges';
 
 function AdminDashboard() {
     const [users, setUsers] = useState([]);
@@ -15,8 +16,10 @@ function AdminDashboard() {
     const [showAddForm, setShowAddForm] = useState(false);
     const { auth } = useContext(AuthContext);
     const [currentMonthGoal, setCurrentMonthGoal] = useState(0);
+    const [teamTarget, setTeamTarget] = useState(0);
     const [teamGoal, setTeamGoal] = useState('');
     const [selectedMonth, setSelectedMonth] = useState('');
+    const [statusFilter, setStatusFilter] = useState('active'); // 'active' or 'inactive'
 
     const initialFormState = {
         name: '',
@@ -24,7 +27,9 @@ function AdminDashboard() {
         password: '',
         role: 'Salesperson',
         organization: '',
-        status: 'active'
+        status: 'active',
+        ethos_training_complete: false,
+        bmw_training_complete: false
     };
     
     const [formData, setFormData] = useState(initialFormState);
@@ -71,12 +76,15 @@ function AdminDashboard() {
         setIsSubmitting(true);
         
         console.log('Sending form data:', formData);
+        console.log('Editing user:', editingUser);
         
         try {
             if (editingUser) {
-                await axios.put(`${API_BASE_URL}/users/${editingUser.id}`, formData, {
+                console.log('Updating user with ID:', editingUser.id);
+                const response = await axios.put(`${API_BASE_URL}/users/${editingUser.id}`, formData, {
                     headers: { Authorization: `Bearer ${auth.token}` }
                 });
+                console.log('Update response:', response.data);
                 setSuccess('User updated successfully');
             } else {
                 const response = await axios.post(`${API_BASE_URL}/users`, formData, {
@@ -107,7 +115,9 @@ function AdminDashboard() {
             password: '',
             role: user.role_name || user.role,
             organization: user.organization_name || user.organization,
-            status: user.status || 'active'
+            status: user.status || 'active',
+            ethos_training_complete: user.ethos_training_complete || false,
+            bmw_training_complete: user.bmw_training_complete || false
         });
         setShowAddForm(true);
     };
@@ -163,9 +173,11 @@ function AdminDashboard() {
             console.log('Goal submission response:', response.data);
 
             if (response.data) {
-                alert('Team goal saved successfully');
+                alert('Team target saved successfully');
                 setTeamGoal('');
+                setSelectedMonth('');
                 fetchCurrentMonthGoal();
+                fetchTeamTarget();
             }
         } catch (error) {
             console.error('Error saving team goal:', {
@@ -180,10 +192,10 @@ function AdminDashboard() {
     const fetchCurrentMonthGoal = useCallback(async () => {
         try {
             const currentMonth = format(new Date(), 'yyyy-MM');
-            console.log('Fetching goal for month:', currentMonth);
+            console.log('Fetching team goal (sum) for month:', currentMonth);
             
             const response = await axios.get(
-                `${API_BASE_URL}/goals/team/${currentMonth}`,
+                `${API_BASE_URL}/goals/team-goal/${currentMonth}`,
                 {
                     headers: { 
                         'Authorization': `Bearer ${auth.token}`,
@@ -192,7 +204,7 @@ function AdminDashboard() {
                 }
             );
             
-            console.log('Goal response:', response.data);
+            console.log('Team goal (sum) response:', response.data);
             
             if (response.data === null || response.data === undefined) {
                 console.warn('No data received from team goal endpoint');
@@ -208,18 +220,63 @@ function AdminDashboard() {
                 message: error.message,
                 response: error.response?.data,
                 status: error.response?.status,
-                url: `${API_BASE_URL}/goals/team/${format(new Date(), 'yyyy-MM')}`
+                url: `${API_BASE_URL}/goals/team-goal/${format(new Date(), 'yyyy-MM')}`
             });
             setCurrentMonthGoal(0);
         }
     }, [auth.token]);
 
+    const fetchTeamTarget = useCallback(async () => {
+        try {
+            const currentMonth = format(new Date(), 'yyyy-MM');
+            console.log('Fetching team target for month:', currentMonth);
+            
+            const response = await axios.get(
+                `${API_BASE_URL}/goals/team/${currentMonth}`,
+                {
+                    headers: { 
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            
+            console.log('Team target response:', response.data);
+            
+            if (response.data === null || response.data === undefined) {
+                console.warn('No data received from team target endpoint');
+                setTeamTarget(0);
+                return;
+            }
+            
+            const targetCount = response.data.goal_count;
+            setTeamTarget(targetCount);
+            
+        } catch (error) {
+            console.error('Error fetching team target:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                url: `${API_BASE_URL}/goals/team/${format(new Date(), 'yyyy-MM')}`
+            });
+            setTeamTarget(0);
+        }
+    }, [auth.token]);
+
     useEffect(() => {
         fetchCurrentMonthGoal();
-    }, [fetchCurrentMonthGoal]);
+        fetchTeamTarget();
+    }, [fetchCurrentMonthGoal, fetchTeamTarget]);
 
     const handleMonthChange = (e) => {
         setSelectedMonth(e.target.value);
+    };
+
+    // Filter users based on status
+    const filteredUsers = users.filter(user => user.status === statusFilter);
+
+    const handleStatusFilterToggle = () => {
+        setStatusFilter(statusFilter === 'active' ? 'inactive' : 'active');
     };
 
     if (loading) return <div>Loading users...</div>;
@@ -232,9 +289,18 @@ function AdminDashboard() {
             <div className="team-goal-section">
                 <h2>Team Goal Management</h2>
                 
-                <div className="current-month-goal">
-                    <h3>Current Month Goal ({format(new Date(), 'MMMM yyyy')})</h3>
-                    <p>{currentMonthGoal}</p>
+                <div className="current-month-goals">
+                    <div className="goal-display">
+                        <h3>Team Goal ({format(new Date(), 'MMMM yyyy')})</h3>
+                        <p className="goal-value">{currentMonthGoal}</p>
+                        <small className="goal-note">Sum of all individual team member targets</small>
+                    </div>
+                    
+                    <div className="goal-display">
+                        <h3>Team Target ({format(new Date(), 'MMMM yyyy')})</h3>
+                        <p className="goal-value">{teamTarget}</p>
+                        <small className="goal-note">Store-wide target set by manager</small>
+                    </div>
                 </div>
 
                 <div className="goal-form">
@@ -244,20 +310,25 @@ function AdminDashboard() {
                             type="month"
                             value={selectedMonth}
                             onChange={handleMonthChange}
+                            className="month-input"
                         />
                     </div>
                     <div className="form-group">
-                        <label>Set New Goal:</label>
+                        <label>Team Target (store-wide goal):</label>
                         <input
                             type="number"
                             value={teamGoal}
                             onChange={(e) => setTeamGoal(e.target.value)}
-                            placeholder="Enter team goal"
-                            min="0"
+                            placeholder="Enter team target"
+                            className="goal-input"
                         />
                     </div>
-                    <button onClick={handleTeamGoalSubmit}>
-                        Set Team Goal
+                    <button 
+                        onClick={handleTeamGoalSubmit}
+                        disabled={isSubmitting}
+                        className="submit-button"
+                    >
+                        {isSubmitting ? 'Saving...' : 'Set Team Target'}
                     </button>
                 </div>
             </div>
@@ -272,6 +343,57 @@ function AdminDashboard() {
             >
                 <i className="fas fa-plus"></i> Add New User
             </button>
+
+            <div className="table-wrapper">
+                <div className="users-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Organization</th>
+                                <th>Status</th>
+                                <th>Training</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredUsers.map(user => (
+                                <tr key={user.id}>
+                                    <td>{user.id}</td>
+                                    <td>{user.name}</td>
+                                    <td>{user.email}</td>
+                                    <td>{user.role_name}</td>
+                                    <td>{user.organization_name}</td>
+                                    <td>{user.status}</td>
+                                    <td>
+                                        <TrainingBadges 
+                                            ethosTrainingComplete={user.ethos_training_complete}
+                                            bmwTrainingComplete={user.bmw_training_complete}
+                                            size="small"
+                                        />
+                                    </td>
+                                    <td>
+                                        <button onClick={() => handleEdit(user)}>Edit</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div className="status-filter-section">
+                <span className="user-count">Showing {filteredUsers.length} {statusFilter} users</span>
+                <button 
+                    onClick={handleStatusFilterToggle}
+                    className={`status-filter-btn ${statusFilter === 'active' ? 'active' : 'inactive'}`}
+                >
+                    {statusFilter === 'active' ? 'Active Users' : 'Inactive Users'}
+                </button>
+            </div>
 
             {showAddForm && (
                 <div className="add-user-modal">
@@ -310,14 +432,17 @@ function AdminDashboard() {
                             </div>
 
                             <div className="form-group">
-                                <label htmlFor="password">Password</label>
+                                <label htmlFor="password">
+                                    Password {editingUser && '(leave blank to keep current password)'}
+                                </label>
                                 <input
                                     id="password"
                                     type="password"
                                     name="password"
                                     value={formData.password}
                                     onChange={handleInputChange}
-                                    required
+                                    placeholder={editingUser ? "••••••••" : "Enter password"}
+                                    required={!editingUser}
                                 />
                             </div>
 
@@ -347,6 +472,38 @@ function AdminDashboard() {
                                     onChange={handleInputChange}
                                     required
                                 />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Training Status</label>
+                                <div className="training-checkboxes">
+                                    <div className="training-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            id="ethos_training_complete"
+                                            name="ethos_training_complete"
+                                            checked={formData.ethos_training_complete}
+                                            onChange={(e) => setFormData({
+                                                ...formData,
+                                                ethos_training_complete: e.target.checked
+                                            })}
+                                        />
+                                        <label htmlFor="ethos_training_complete">Ethos Training Complete</label>
+                                    </div>
+                                    <div className="training-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            id="bmw_training_complete"
+                                            name="bmw_training_complete"
+                                            checked={formData.bmw_training_complete}
+                                            onChange={(e) => setFormData({
+                                                ...formData,
+                                                bmw_training_complete: e.target.checked
+                                            })}
+                                        />
+                                        <label htmlFor="bmw_training_complete">BMW Training Complete</label>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="form-actions">
@@ -382,39 +539,6 @@ function AdminDashboard() {
                     </div>
                 </div>
             )}
-
-            <div className="table-wrapper">
-                <div className="users-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Organization</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map(user => (
-                                <tr key={user.id}>
-                                    <td>{user.id}</td>
-                                    <td>{user.name}</td>
-                                    <td>{user.email}</td>
-                                    <td>{user.role_name}</td>
-                                    <td>{user.organization_name}</td>
-                                    <td>{user.status}</td>
-                                    <td>
-                                        <button onClick={() => handleEdit(user)}>Edit</button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
     );
 }

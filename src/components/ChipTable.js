@@ -6,6 +6,7 @@ import { API_BASE_URL } from '../config';
 import Totals from './Totals';
 import MonthlyGoal from './MonthlyGoal';
 import Chip from './Chip';
+import TrainingBadges from './TrainingBadges';
 import './ChipTable.css';
 
 /**
@@ -14,6 +15,7 @@ import './ChipTable.css';
 function ChipTable({ sales = [], onEdit }) {
   const { auth } = useAuth();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [userTrainingData, setUserTrainingData] = useState({});
 
   // Add responsive handler
   useEffect(() => {
@@ -115,6 +117,34 @@ function ChipTable({ sales = [], onEdit }) {
     fetchGoals();
   }, [sales, fetchGoals]);
 
+  // Fetch user training data
+  const fetchUserTrainingData = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/users`, {
+        headers: { 
+          'Authorization': `Bearer ${auth.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const trainingData = {};
+      response.data.forEach(user => {
+        trainingData[user.name] = {
+          ethos_training_complete: user.ethos_training_complete || false,
+          bmw_training_complete: user.bmw_training_complete || false
+        };
+      });
+      
+      setUserTrainingData(trainingData);
+    } catch (error) {
+      console.error('Error fetching user training data:', error);
+    }
+  }, [auth.token]);
+
+  useEffect(() => {
+    fetchUserTrainingData();
+  }, [fetchUserTrainingData]);
+
   // Add a function to determine if goal number should be visible
   const canSeeGoalNumber = (advisorName) => {
     return isManagerOrAdmin || auth?.user?.name === advisorName;
@@ -130,17 +160,28 @@ function ChipTable({ sales = [], onEdit }) {
         <div key={name} className="advisor-section">
           <div className="advisor-name">
             <h3>
-              {name}
+              <div className="advisor-name-with-badges">
+                <span>{name}</span>
+              </div>
               <div className="advisor-stats">
-                <span className="delivered">{delivered}</span>
-                <span className="pending">({pending})</span>
-                <MonthlyGoal 
-                  advisor={name} 
-                  month={format(new Date(), 'yyyy-MM')} 
-                  onUpdate={fetchGoals}
-                  deliveredCount={delivered}
-                  showGoalNumber={canSeeGoalNumber(name)}
-                />
+                <div className="stats-left">
+                  <span className="delivered">{delivered}</span>
+                  <span className="pending">({pending})</span>
+                  <MonthlyGoal 
+                    advisor={name} 
+                    month={format(new Date(), 'yyyy-MM')} 
+                    onUpdate={fetchGoals}
+                    deliveredCount={delivered}
+                    showGoalNumber={canSeeGoalNumber(name)}
+                  />
+                </div>
+                <div className="training-badges">
+                  <TrainingBadges 
+                    ethosTrainingComplete={userTrainingData[name]?.ethos_training_complete}
+                    bmwTrainingComplete={userTrainingData[name]?.bmw_training_complete}
+                    size="small"
+                  />
+                </div>
               </div>
             </h3>
           </div>

@@ -19,8 +19,8 @@ const NavbarComponent = ({ isDarkMode, onToggleTheme }) => {
       <Container>
         <Navbar.Brand as={Link} to="/">
           <img
-            src="/logo512.png"
-            alt="BOP Logo"
+            src="/assets/images/logo.png?v=1"
+            alt="BOP Chips Logo"
             className="navbar-logo"
           />
         </Navbar.Brand>

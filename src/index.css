@@ -8,6 +8,20 @@
   --mini-green: #70B62C;
   --light-gray: #f2f2f2;
   --hover-background: #f8f9fa;
+  
+  /* Dashboard Variables */
+  --bg-color: #ffffff;
+  --card-bg: #ffffff;
+  --text-secondary: #666666;
+  --primary-color: #0066B1;
+  --primary-hover: #005a9e;
+  --success-color: #70B62C;
+  --error-color: #dc3545;
+  --error-bg: #f8d7da;
+  --error-border: #f5c6cb;
+  --input-bg: #ffffff;
+  --secondary-bg: #f8f9fa;
+  --hover-bg: #e9ecef;
 }
 
 .night-mode {
@@ -16,6 +30,20 @@
   --border-color: #555555;
   --light-gray: #2a2a2a;
   --hover-background: #2a2a2a;
+  
+  /* Dashboard Variables - Dark Mode */
+  --bg-color: #121212;
+  --card-bg: #1e1e1e;
+  --text-secondary: #b0b0b0;
+  --primary-color: #0066B1;
+  --primary-hover: #005a9e;
+  --success-color: #70B62C;
+  --error-color: #ff6b6b;
+  --error-bg: #2d1b1b;
+  --error-border: #4a2c2c;
+  --input-bg: #2a2a2a;
+  --secondary-bg: #2a2a2a;
+  --hover-bg: #333333;
 }
 
 body {

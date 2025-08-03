@@ -21,6 +21,7 @@ import ViewToggleBar from './components/ViewToggleBar';
 import ChangePasswordForm from './components/ChangePasswordForm';
 import './App.css';
 import SalespersonDashboard from './components/SalespersonDashboard';
+import ManagerDashboard from './components/ManagerDashboard';
 import ErrorBoundary from './components/ErrorBoundary';
 import SearchUnifiedVehicles from './components/SearchUnifiedVehicles';
 
@@ -310,6 +311,11 @@ function App() {
             <Route path="/admin" element={
               <PrivateRoute roles={['Admin']}>
                 <AdminDashboard />
+              </PrivateRoute>
+            } />
+            <Route path="/manager" element={
+              <PrivateRoute roles={['Admin', 'Manager']}>
+                <ManagerDashboard />
               </PrivateRoute>
             } />
             <Route path="/" element={

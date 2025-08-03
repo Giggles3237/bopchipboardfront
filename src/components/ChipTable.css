@@ -98,7 +98,16 @@ html, body, #root {
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+}
+
+.advisor-name-with-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.advisor-name-with-badges span {
+  margin-right: 4px;
 }
 
 /* Remove any overflow settings from parent containers */
@@ -127,7 +136,19 @@ html, body, #root {
 .advisor-stats {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
+  width: 100%;
+}
+
+.advisor-stats .stats-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.advisor-stats .training-badges {
+  margin-left: auto;
 }
 
 .advisor-stats .delivered {
