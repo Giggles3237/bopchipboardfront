@@ -16,7 +16,9 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
     instructions: [],
     comments: '',
     promiseTime: '14:00',
-    getReadyDate: new Date().toISOString().split('T')[0]
+    // Store as Date object to avoid timezone issues in the DatePicker
+    getReadyDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    salespersonEmail: auth?.user?.email || ''
   });
 
   // Add useEffect to fetch salespeople
@@ -167,7 +169,8 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
         comments: getReadyData.comments,
         customerName: formData.clientName,
         salesperson: formData.advisor,
-        submittedBy: auth?.user?.name || ''
+        submittedBy: auth?.user?.name || '',
+        salespersonEmail: getReadyData.salespersonEmail
       };
 
       const response = await axios.post(`${API_BASE_URL}/getready/send-email`, getReadyEmailData, {
@@ -178,7 +181,9 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
       });
 
       if (response.status === 200) {
-        alert('Get Ready email sent successfully!');
+        const sentTo = response?.data?.recipients || [];
+        const cc = response?.data?.cc ? `\nCC: ${response.data.cc}` : '';
+        alert(`Get Ready email sent successfully!\nSent to: ${sentTo.join(', ') || 'N/A'}${cc}`);
         setShowGetReady(false);
       }
     } catch (error) {
@@ -442,6 +447,18 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
                     />
                   </div>
                   
+                  <div>
+                    <label htmlFor="getReadySalespersonEmail">Salesperson's Email:</label>
+                    <input
+                      type="email"
+                      id="getReadySalespersonEmail"
+                      name="salespersonEmail"
+                      value={getReadyData.salespersonEmail}
+                      onChange={handleGetReadyChange}
+                      placeholder="name@example.com"
+                    />
+                  </div>
+
                   <div>
                     <label htmlFor="getReadyPromiseTime">Promise Time:</label>
                     <input
