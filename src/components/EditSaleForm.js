@@ -5,6 +5,7 @@ import './EditSaleForm.css';
 import { AuthContext } from '../contexts/AuthContext';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
+import ScheduleButton from './ScheduleButton';
 
 function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
   const { auth } = useContext(AuthContext);
@@ -478,6 +479,13 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
                     >
                       Send Get Ready Email
                     </button>
+                    <ScheduleButton
+                      stockNumber={formData.stockNumber}
+                      clientLastName={formData.clientName ? formData.clientName.split(' ').pop() : ''}
+                      advisorLastName={formData.advisor ? formData.advisor.split(' ').pop() : ''}
+                      advisorName={formData.advisor}
+                      advisorEmail={auth?.user?.email || ''}
+                    />
                   </div>
                 </div>
               )}
