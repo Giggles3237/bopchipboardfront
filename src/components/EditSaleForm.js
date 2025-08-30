@@ -380,6 +380,13 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
               >
                 Get Ready
               </button>
+              <ScheduleButton
+                stockNumber={formData.stockNumber}
+                clientLastName={formData.clientName ? formData.clientName.split(' ').pop() : ''}
+                advisorLastName={formData.advisor ? formData.advisor.split(' ').pop() : ''}
+                advisorName={formData.advisor}
+                advisorEmail={salespeople.find(person => person.name === formData.advisor)?.email || auth?.user?.email || ''}
+              />
               
               {showGetReady && (
                 <div className="get-ready-fields">
@@ -479,13 +486,6 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
                     >
                       Send Get Ready Email
                     </button>
-                    <ScheduleButton
-                      stockNumber={formData.stockNumber}
-                      clientLastName={formData.clientName ? formData.clientName.split(' ').pop() : ''}
-                      advisorLastName={formData.advisor ? formData.advisor.split(' ').pop() : ''}
-                      advisorName={formData.advisor}
-                      advisorEmail={auth?.user?.email || ''}
-                    />
                   </div>
                 </div>
               )}
