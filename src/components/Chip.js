@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef, useMemo } from 'react';
+import React, { useState, useContext, useRef, useMemo, useEffect } from 'react';
 import Tooltip from './Tooltip'; // Import the Tooltip component
 import { AuthContext } from '../contexts/AuthContext';
 import './Chip.css';
@@ -7,6 +7,7 @@ function Chip({ sale, onEdit }) {
   const [isHovered, setIsHovered] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({});
   const chipRef = useRef(null);
+  const hoverTimeoutRef = useRef(null);
   const { auth } = useContext(AuthContext);
   
   // Determine if the current user is a manager or admin
@@ -18,8 +19,17 @@ function Chip({ sale, onEdit }) {
   const isEditable = useMemo(() => {
     if (!auth?.user) return false;
     if (isManagerOrAdmin) return true;
-    return auth.user.name === sale.advisor;
+    return auth.user.name === sale?.advisor;
   }, [auth, sale, isManagerOrAdmin]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   if (!sale) {
     return null;
@@ -54,6 +64,12 @@ function Chip({ sale, onEdit }) {
   };
 
   const handleMouseEnter = () => {
+    // Clear any existing timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    
+    // Set tooltip position immediately
     if (chipRef.current) {
       const rect = chipRef.current.getBoundingClientRect();
       setTooltipPosition({
@@ -61,10 +77,19 @@ function Chip({ sale, onEdit }) {
         left: rect.left + (rect.width / 2) + window.scrollX
       });
     }
-    setIsHovered(true);
+    
+    // Delay showing the tooltip by 500ms
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsHovered(true);
+    }, 500);
   };
 
   const handleMouseLeave = () => {
+    // Clear the timeout if mouse leaves before delay completes
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
     setIsHovered(false);
   };
 
@@ -82,6 +107,7 @@ function Chip({ sale, onEdit }) {
       style={{ cursor: isEditable ? 'pointer' : 'default' }}
       data-vehicle-info={vehicleInfo}
       data-client-info={clientInfo}
+      data-hovered={isHovered}
     >
       <span className="stock-number">
         {sale.stockNumber}

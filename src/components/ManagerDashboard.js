@@ -19,7 +19,6 @@ import {
 } from 'recharts';
 import './ManagerDashboard.css';
 import ViewToggleBar from './ViewToggleBar';
-import HauntedHouseTracker from './HauntedHouseTracker';
 
 const calculateWorkingDays = (startDate, endDate) => {
   let count = 0;
@@ -263,6 +262,7 @@ function ManagerDashboard() {
 
   return (
     <div className="manager-dashboard">
+      <ViewToggleBar />
       <div className="dashboard-header">
         <h1>Team Performance Dashboard</h1>
         <div className="header-actions">
@@ -313,9 +313,6 @@ function ManagerDashboard() {
 
       {selectedView === 'overview' && (
         <>
-          {/* Haunted House Progress Tracker */}
-          <HauntedHouseTracker month={format(dateRange.start, 'yyyy-MM')} />
-
           {/* Team Performance Summary */}
           <div className="team-summary-grid">
             <div className="summary-card">

@@ -13,9 +13,21 @@
   border: none;
   border-radius: 0;
   user-select: none;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
   width: calc(10% - 15px);
   box-sizing: border-box;
+}
+
+/* Hover animation - makes chips flow/float */
+.chip-component:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+/* Maintain rotation for pending chips on hover */
+.chip-component.pending:hover {
+  transform: translateY(-4px) scale(1.05) rotate(10deg);
 }
 
 /* Chip Types with specific colors */
@@ -150,6 +162,11 @@
     transition: background-color 0.2s ease;
     transform: none !important;
     opacity: 1 !important;
+  }
+  
+  .chip-component:hover {
+    transform: none !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
   
   .chip-component::after {

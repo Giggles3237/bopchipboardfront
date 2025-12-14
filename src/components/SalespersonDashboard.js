@@ -16,7 +16,6 @@ import {
 } from 'recharts';
 import './SalespersonDashboard.css';
 import ViewToggleBar from './ViewToggleBar';
-import HauntedHouseTracker from './HauntedHouseTracker';
 
 const calculateWorkingDays = (startDate, endDate) => {
   let count = 0;
@@ -307,9 +306,6 @@ function SalespersonDashboard() {
 
       {selectedView === 'sales' && (
         <>
-          {/* Haunted House Progress Tracker */}
-          <HauntedHouseTracker month={format(new Date(), 'yyyy-MM')} />
-
           {/* Current Month Progress */}
           <div className="current-month-card">
             <h2>Current Month Progress</h2>
