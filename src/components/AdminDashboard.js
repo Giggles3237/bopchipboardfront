@@ -5,8 +5,10 @@ import './AdminDashboard.css';
 import { format } from 'date-fns';
 import { API_BASE_URL } from '../config';
 import TrainingBadges from './TrainingBadges';
+import TrainingManagement from './TrainingManagement';
 
 function AdminDashboard() {
+    const [activeTab, setActiveTab] = useState('users'); // 'users' or 'training'
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -279,13 +281,32 @@ function AdminDashboard() {
         setStatusFilter(statusFilter === 'active' ? 'inactive' : 'active');
     };
 
-    if (loading) return <div>Loading users...</div>;
-    if (error) return <div className="error-message">Error: {error}</div>;
+    if (loading && activeTab === 'users') return <div>Loading users...</div>;
+    if (error && activeTab === 'users' && !users.length) return <div className="error-message">Error: {error}</div>;
 
     return (
         <div className="admin-dashboard">
             <h1>Admin Dashboard</h1>
             
+            <div className="admin-tabs">
+                <button 
+                    className={`admin-tab ${activeTab === 'users' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('users')}
+                >
+                    <i className="fas fa-users"></i> User Management
+                </button>
+                <button 
+                    className={`admin-tab ${activeTab === 'training' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('training')}
+                >
+                    <i className="fas fa-graduation-cap"></i> Training Management
+                </button>
+            </div>
+
+            {activeTab === 'training' ? (
+                <TrainingManagement />
+            ) : (
+                <>
             <div className="team-goal-section">
                 <h2>Team Goal Management</h2>
                 
@@ -538,6 +559,8 @@ function AdminDashboard() {
                         </form>
                     </div>
                 </div>
+            )}
+                </>
             )}
         </div>
     );

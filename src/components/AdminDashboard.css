@@ -3,6 +3,45 @@
   max-width: 100%;
 }
 
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 0;
+}
+
+.admin-tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  margin-bottom: -2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-tab:hover {
+  color: #0653B6;
+  background-color: #f8f9fa;
+}
+
+.admin-tab.active {
+  color: #0653B6;
+  border-bottom-color: #0653B6;
+  background-color: transparent;
+}
+
+.admin-tab i {
+  font-size: 14px;
+}
+
 .users-table-container {
   background: white;
   border-radius: 8px;
