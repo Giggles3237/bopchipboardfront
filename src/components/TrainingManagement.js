@@ -62,7 +62,7 @@ function TrainingManagement() {
         setSavingUsers(prev => new Set(prev).add(userId));
 
         try {
-            const response = await axios.put(
+            await axios.put(
                 `${API_BASE_URL}/users/${userId}`,
                 {
                     name: user.name,
