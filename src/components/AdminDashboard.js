@@ -6,9 +6,10 @@ import { format } from 'date-fns';
 import { API_BASE_URL } from '../config';
 import TrainingBadges from './TrainingBadges';
 import TrainingManagement from './TrainingManagement';
+import TVSettings from './TVSettings';
 
 function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState('users'); // 'users' or 'training'
+    const [activeTab, setActiveTab] = useState('users'); // 'users', 'training', or 'tv'
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -295,16 +296,24 @@ function AdminDashboard() {
                 >
                     <i className="fas fa-users"></i> User Management
                 </button>
-                <button 
+                <button
                     className={`admin-tab ${activeTab === 'training' ? 'active' : ''}`}
                     onClick={() => setActiveTab('training')}
                 >
                     <i className="fas fa-graduation-cap"></i> Training Management
                 </button>
+                <button
+                    className={`admin-tab ${activeTab === 'tv' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('tv')}
+                >
+                    TV Dashboard Settings
+                </button>
             </div>
 
             {activeTab === 'training' ? (
                 <TrainingManagement />
+            ) : activeTab === 'tv' ? (
+                <TVSettings />
             ) : (
                 <>
             <div className="team-goal-section">

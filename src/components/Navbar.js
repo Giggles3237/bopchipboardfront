@@ -29,10 +29,10 @@ const NavbarComponent = ({ isDarkMode, onToggleTheme }) => {
           <Nav className="me-auto">
             {auth?.user && <Nav.Link as={Link} to="/">Home</Nav.Link>}
             {auth?.user?.role === 'Admin' && (
-              <Nav.Link as={Link} to="/admin">Admin Dashboard</Nav.Link>
+              <Nav.Link as={Link} to="/admin">Admin</Nav.Link>
             )}
-            {(auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager') && (
-              <Nav.Link as={Link} to="/training">Training</Nav.Link>
+            {auth?.user?.role === 'Admin' && (
+              <Nav.Link as={Link} to="/tv">TV</Nav.Link>
             )}
           </Nav>
           <Nav>
