@@ -31,6 +31,9 @@ const NavbarComponent = ({ isDarkMode, onToggleTheme }) => {
             {auth?.user?.role === 'Admin' && (
               <Nav.Link as={Link} to="/admin">Admin Dashboard</Nav.Link>
             )}
+            {(auth?.user?.role === 'Admin' || auth?.user?.role === 'Manager') && (
+              <Nav.Link as={Link} to="/training">Training</Nav.Link>
+            )}
           </Nav>
           <Nav>
             <ThemeToggle isDarkMode={isDarkMode} onToggle={onToggleTheme} />

@@ -113,8 +113,8 @@ function SalespersonDashboard() {
         // Calculate yearly statistics
         calculateYearlyStats(userSales);
 
-        // Inside fetchSalesHistory
-        const pendingCount = thisMonthSales.filter(sale => !sale.delivered).length;
+        // Inside fetchSalesHistory — wholesale excluded from counts
+        const pendingCount = thisMonthSales.filter(sale => !sale.delivered && sale.type !== 'Wholesale').length;
         setPendingSales(pendingCount);
       } catch (error) {
         console.error('Error fetching sales data:', error);
@@ -154,8 +154,8 @@ function SalespersonDashboard() {
     const remainingWorkingDays = calculateWorkingDays(today, monthEnd);
     const isEndOfMonth = remainingWorkingDays <= 7;
 
-    // Calculate current month's delivered sales
-    const deliveredCount = currentMonthSales.filter(sale => sale.delivered).length;
+    // Calculate current month's delivered sales — wholesale excluded
+    const deliveredCount = currentMonthSales.filter(sale => sale.delivered && sale.type !== 'Wholesale').length;
     
     // Calculate daily rate based on delivered sales only
     const currentDailyRate = completedWorkingDays > 0 
@@ -197,9 +197,10 @@ function SalespersonDashboard() {
     const monthlyTotals = {};
     const typeCount = {};
 
-    // Calculate current year totals for YTD and type counts
-    const currentYearSales = sales.filter(sale => 
-      new Date(sale.deliveryDate).getFullYear() === currentYear
+    // Calculate current year totals for YTD and type counts — wholesale excluded
+    const currentYearSales = sales.filter(sale =>
+      new Date(sale.deliveryDate).getFullYear() === currentYear &&
+      sale.type !== 'Wholesale'
     );
 
     // Split the calculations:
@@ -208,8 +209,8 @@ function SalespersonDashboard() {
       typeCount[sale.type] = (typeCount[sale.type] || 0) + 1;
     });
 
-    // 2. All sales for best month calculation
-    sales.forEach(sale => {
+    // 2. All non-wholesale sales for best month calculation
+    sales.filter(sale => sale.type !== 'Wholesale').forEach(sale => {
       const month = format(new Date(sale.deliveryDate), 'MMMM yyyy');
       monthlyTotals[month] = (monthlyTotals[month] || 0) + 1;
     });
@@ -241,12 +242,14 @@ function SalespersonDashboard() {
       return null;
     }
     
-    const currentSales = salesData.filter(sale => 
-      format(new Date(sale.deliveryDate), 'MMM yyyy') === monthStr
+    const currentSales = salesData.filter(sale =>
+      format(new Date(sale.deliveryDate), 'MMM yyyy') === monthStr &&
+      sale.type !== 'Wholesale'
     ).length;
 
-    const priorYearSales = salesData.filter(sale => 
-      format(new Date(sale.deliveryDate), 'MMM yyyy') === lastYearStr
+    const priorYearSales = salesData.filter(sale =>
+      format(new Date(sale.deliveryDate), 'MMM yyyy') === lastYearStr &&
+      sale.type !== 'Wholesale'
     ).length;
 
     const monthTeamSales = teamSalesData.filter(sale => 

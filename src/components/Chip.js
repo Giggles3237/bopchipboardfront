@@ -47,6 +47,8 @@ function Chip({ sale, onEdit }) {
         case 'Used BMW':
         case 'Used MINI':
           return 'used-cpo';
+        case 'Wholesale':
+          return 'wholesale';
         default:
           return 'default';
       }

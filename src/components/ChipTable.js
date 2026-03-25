@@ -44,14 +44,16 @@ function ChipTable({ sales = [], onEdit }) {
           name: sale.advisor, 
           delivered: 0, 
           pending: 0,
-          isHouse: sale.advisor.toLowerCase().includes('house'),
+          isHouse: (sale.advisor || '').toLowerCase().includes('house'),
           isCurrentUser: sale.advisor === auth?.user?.name
         };
       }
-      if (sale.delivered) {
-        acc[sale.advisor].delivered++;
-      } else {
-        acc[sale.advisor].pending++;
+      if (sale.type !== 'Wholesale') {
+        if (sale.delivered) {
+          acc[sale.advisor].delivered++;
+        } else {
+          acc[sale.advisor].pending++;
+        }
       }
       return acc;
     }, {});
@@ -189,6 +191,9 @@ function ChipTable({ sales = [], onEdit }) {
             {sales
               .filter(sale => sale.advisor === name)
               .sort((a, b) => {
+                // Wholesale always last
+                if (a.type === 'Wholesale' && b.type !== 'Wholesale') return 1;
+                if (a.type !== 'Wholesale' && b.type === 'Wholesale') return -1;
                 if (a.delivered === b.delivered) {
                   return new Date(b.deliveryDate) - new Date(a.deliveryDate);
                 }

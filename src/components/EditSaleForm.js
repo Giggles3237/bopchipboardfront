@@ -216,7 +216,8 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
     'Used BMW',
     'New MINI',
     'CPO MINI',
-    'Used MINI'
+    'Used MINI',
+    'Wholesale'
   ];
 
   const instructionOptions = [

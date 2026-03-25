@@ -24,6 +24,7 @@ import SalespersonDashboard from './components/SalespersonDashboard';
 import ManagerDashboard from './components/ManagerDashboard';
 import ErrorBoundary from './components/ErrorBoundary';
 import SearchUnifiedVehicles from './components/SearchUnifiedVehicles';
+import TrainingManagement from './components/TrainingManagement';
 
 /**
  * App Component
@@ -316,6 +317,11 @@ function App() {
             <Route path="/manager" element={
               <PrivateRoute roles={['Admin', 'Manager']}>
                 <ManagerDashboard />
+              </PrivateRoute>
+            } />
+            <Route path="/training" element={
+              <PrivateRoute roles={['Admin', 'Manager']}>
+                <TrainingManagement />
               </PrivateRoute>
             } />
             <Route path="/" element={

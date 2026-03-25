@@ -52,6 +52,12 @@
   color: white;
 }
 
+.chip-component.wholesale {
+  background-color: #ffc107;
+  color: #5d4037;
+  border: 1px solid #e0a800;
+}
+
 /* Night mode adjustments */
 .night-mode .chip-component.new-bmw,
 .night-mode .chip-component.default {

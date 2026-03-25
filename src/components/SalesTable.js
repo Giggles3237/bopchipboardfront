@@ -120,14 +120,18 @@ function SalesTable({ sales, onEdit, onDelete }) {
     });
   };
 
-  // Get current rows
+  // Get current rows — wholesale always sorted to bottom
   const filteredData = getFilteredData();
+  const sortedData = [
+    ...filteredData.filter(s => s.type !== 'Wholesale'),
+    ...filteredData.filter(s => s.type === 'Wholesale'),
+  ];
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = sortedData.slice(indexOfFirstRow, indexOfLastRow);
 
   // Calculate total pages
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const totalPages = Math.ceil(sortedData.length / rowsPerPage);
 
   const handlePageChange = (selectedItem) => {
     setCurrentPage(selectedItem.selected + 1);
@@ -173,7 +177,10 @@ function SalesTable({ sales, onEdit, onDelete }) {
   return (
     <div className="sales-table-container">
       <div className="filtered-results">
-        <span>Showing {filteredData.length} of {sales.length} total sales</span>
+        <span>
+          Showing {filteredData.filter(s => s.type !== 'Wholesale').length} of {sales.filter(s => s.type !== 'Wholesale').length} sales
+          {filteredData.filter(s => s.type === 'Wholesale').length > 0 && ` (+${filteredData.filter(s => s.type === 'Wholesale').length} wholesale)`}
+        </span>
       </div>
       <table className="sales-table">
         <thead>
@@ -196,10 +203,10 @@ function SalesTable({ sales, onEdit, onDelete }) {
         </thead>
         <tbody>
           {currentRows.map((sale) => (
-            <tr 
-              key={sale.id} 
+            <tr
+              key={sale.id}
               onClick={() => handleRowClick(sale)}
-              className="clickable-row"
+              className={`clickable-row${sale.type === 'Wholesale' ? ' wholesale-row' : ''}`}
             >
               <td>{formatStockNumber(sale.stockNumber)}</td>
               <td>{formatClientName(sale.clientName, sale.advisor)}</td>

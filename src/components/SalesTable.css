@@ -214,6 +214,15 @@
   background-color: var(--light-gray);
 }
 
+.wholesale-row {
+  background-color: #fff8e1;
+  color: #795548;
+}
+
+.wholesale-row:hover {
+  background-color: #ffecb3 !important;
+}
+
 .sales-table td.hidden-client {
   color: var(--text-color);
   opacity: 0.5;
