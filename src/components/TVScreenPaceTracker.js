@@ -17,7 +17,6 @@ function TVScreenPaceTracker({ advisors }) {
   const monthStart = startOfMonth(today);
   const monthEnd = endOfMonth(today);
   const workingDaysTotal = countWorkingDays(monthStart, monthEnd);
-  const workingDaysDone  = countWorkingDays(monthStart, today);
   const workingDaysLeft  = countWorkingDays(today, monthEnd);
 
   return (
