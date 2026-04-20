@@ -4,7 +4,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import './EditSaleForm.css';
 import { AuthContext } from '../contexts/AuthContext';
 import axios from 'axios';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, GET_READY_SUBMIT_URL } from '../config';
 import ScheduleButton from './ScheduleButton';
 
 function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
@@ -150,8 +150,41 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
     }));
   };
 
+  const buildIntegrationPayload = () => {
+    const resolvedDate = getReadyData.getReadyDate instanceof Date
+      ? getReadyData.getReadyDate.toISOString().split('T')[0]
+      : new Date(getReadyData.getReadyDate).toISOString().split('T')[0];
+
+    const selectedSalesperson = salespeople.find(person => person.name === formData.advisor);
+
+    return {
+      stock_number: formData.stockNumber,
+      year: Number(formData.year),
+      make: formData.make,
+      model: formData.model,
+      color: formData.color,
+      getReadyDate: resolvedDate,
+      promiseTime: getReadyData.promiseTime || '14:00',
+      submitted_by_name: formData.advisor,
+      submitted_by_email: getReadyData.salespersonEmail || selectedSalesperson?.email || '',
+      instructions: getReadyData.instructions,
+      comments: getReadyData.comments,
+      location: getReadyData.location,
+      miles: getReadyData.miles,
+      customerName: formData.clientName,
+      chassis: formData.chassis || '',
+      integration_source: 'bopchipboard'
+    };
+  };
+
   const handleSendGetReady = async () => {
     try {
+      const integrationResponse = await axios.post(GET_READY_SUBMIT_URL, buildIntegrationPayload(), {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
       const dueDate = getReadyData.getReadyDate instanceof Date 
         ? getReadyData.getReadyDate.toLocaleDateString()
         : new Date(getReadyData.getReadyDate).toLocaleDateString();
@@ -174,22 +207,22 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
         salespersonEmail: getReadyData.salespersonEmail
       };
 
-      const response = await axios.post(`${API_BASE_URL}/getready/send-email`, getReadyEmailData, {
+      const emailResponse = await axios.post(`${API_BASE_URL}/getready/send-email`, getReadyEmailData, {
         headers: {
           'Authorization': `Bearer ${auth.token}`,
           'Content-Type': 'application/json'
         }
       });
 
-      if (response.status === 200) {
-        const sentTo = response?.data?.recipients || [];
-        const cc = response?.data?.cc ? `\nCC: ${response.data.cc}` : '';
-        alert(`Get Ready email sent successfully!\nSent to: ${sentTo.join(', ') || 'N/A'}${cc}`);
+      if ((integrationResponse.status === 201 || integrationResponse.status === 200) && emailResponse.status === 200) {
+        const sentTo = emailResponse?.data?.recipients || [];
+        const cc = emailResponse?.data?.cc ? `\nCC: ${emailResponse.data.cc}` : '';
+        alert(`Get Ready submitted to the new system and email sent successfully.\nSent to: ${sentTo.join(', ') || 'N/A'}${cc}`);
         setShowGetReady(false);
       }
     } catch (error) {
-      console.error('Error sending Get Ready email:', error);
-      alert(`Error sending Get Ready email: ${error.message}`);
+      console.error('Error processing Get Ready:', error);
+      alert(`Error processing Get Ready: ${error.response?.data?.message || error.message}`);
     }
   };
 
@@ -485,7 +518,7 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
                       className="send-get-ready-button"
                       onClick={handleSendGetReady}
                     >
-                      Send Get Ready Email
+                      Submit Get Ready
                     </button>
                   </div>
                 </div>
