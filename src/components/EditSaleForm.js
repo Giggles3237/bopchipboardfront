@@ -11,6 +11,7 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
   const { auth } = useContext(AuthContext);
   const [salespeople, setSalespeople] = useState([]);
   const [showGetReady, setShowGetReady] = useState(false);
+  const [showLoanerRequest, setShowLoanerRequest] = useState(false);
   const [getReadyData, setGetReadyData] = useState({
     location: 'annex',
     miles: '',
@@ -20,6 +21,10 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
     // Store as Date object to avoid timezone issues in the DatePicker
     getReadyDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
     salespersonEmail: auth?.user?.email || ''
+  });
+  const [loanerRequestData, setLoanerRequestData] = useState({
+    soldUnit: 'Yes',
+    additionalInformation: ''
   });
 
   // Add useEffect to fetch salespeople
@@ -133,6 +138,10 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
     setShowGetReady(!showGetReady);
   };
 
+  const handleLoanerRequestToggle = () => {
+    setShowLoanerRequest(!showLoanerRequest);
+  };
+
   const handleGetReadyChange = (e) => {
     const { name, value, type } = e.target;
     setGetReadyData(prevData => ({
@@ -147,6 +156,14 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
       instructions: prevData.instructions.includes(instruction)
         ? prevData.instructions.filter(item => item !== instruction)
         : [...prevData.instructions, instruction]
+    }));
+  };
+
+  const handleLoanerRequestChange = (e) => {
+    const { name, value } = e.target;
+    setLoanerRequestData(prevData => ({
+      ...prevData,
+      [name]: value
     }));
   };
 
@@ -201,6 +218,40 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
     } catch (error) {
       console.error('Error sending Get Ready email:', error);
       alert(`Error sending Get Ready email: ${error.message}`);
+    }
+  };
+
+  const handleSubmitLoanerRequest = async () => {
+    try {
+      const advisorEmail = salespeople.find(person => person.name === formData.advisor)?.email || auth?.user?.email || '';
+      const loanerPayload = {
+        stockNumber: formData.stockNumber,
+        clientName: formData.clientName,
+        soldUnit: loanerRequestData.soldUnit,
+        additionalInformation: loanerRequestData.additionalInformation,
+        clientAdvisorEmail: advisorEmail,
+        respondersEmail: auth?.user?.email || ''
+      };
+
+      const response = await axios.post(`${API_BASE_URL}/loaners/request`, loanerPayload, {
+        headers: {
+          'Authorization': `Bearer ${auth.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 200) {
+        alert('Loaner request submitted successfully.');
+        setShowLoanerRequest(false);
+      }
+    } catch (error) {
+      console.error('Error submitting loaner request:', error);
+      console.error('Loaner request response:', error.response?.data);
+      const serverMessage = error.response?.data?.flow?.message || error.response?.data?.message || error.message;
+      const readableMessage = typeof serverMessage === 'string'
+        ? serverMessage
+        : JSON.stringify(serverMessage);
+      alert(`Error submitting loaner request: ${readableMessage || error.message}`);
     }
   };
 
@@ -385,6 +436,13 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
           {/* Get Ready Section */}
           {!formData.delivered && (
             <div className="get-ready-section">
+              <button
+                type="button"
+                className="toggle-loaner-request-button"
+                onClick={handleLoanerRequestToggle}
+              >
+                Loaner Request
+              </button>
               <button 
                 type="button" 
                 className="toggle-get-ready-button"
@@ -497,6 +555,86 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
                       onClick={handleSendGetReady}
                     >
                       Send Get Ready Email
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {showLoanerRequest && (
+                <div className="loaner-request-fields">
+                  <div>
+                    <label htmlFor="loanerSoldUnit">Sold Unit?</label>
+                    <select
+                      id="loanerSoldUnit"
+                      name="soldUnit"
+                      value={loanerRequestData.soldUnit}
+                      onChange={handleLoanerRequestChange}
+                    >
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="loanerClientAdvisorEmail">Client Advisor Email:</label>
+                    <input
+                      type="email"
+                      id="loanerClientAdvisorEmail"
+                      value={salespeople.find(person => person.name === formData.advisor)?.email || auth?.user?.email || ''}
+                      readOnly
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="loanerRespondersEmail">Responder's Email:</label>
+                    <input
+                      type="email"
+                      id="loanerRespondersEmail"
+                      value={auth?.user?.email || ''}
+                      readOnly
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="loanerStockNumber">Stock Number:</label>
+                    <input
+                      type="text"
+                      id="loanerStockNumber"
+                      value={formData.stockNumber}
+                      readOnly
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="loanerClientName">Client Name:</label>
+                    <input
+                      type="text"
+                      id="loanerClientName"
+                      value={formData.clientName}
+                      readOnly
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="loanerAdditionalInformation">Additional Notes:</label>
+                    <textarea
+                      id="loanerAdditionalInformation"
+                      name="additionalInformation"
+                      value={loanerRequestData.additionalInformation}
+                      onChange={handleLoanerRequestChange}
+                      placeholder="Enter loaner request details"
+                      rows="3"
+                      required
+                    />
+                  </div>
+
+                  <div className="loaner-request-buttons">
+                    <button
+                      type="button"
+                      className="send-loaner-request-button"
+                      onClick={handleSubmitLoanerRequest}
+                    >
+                      Submit Loaner Request
                     </button>
                   </div>
                 </div>
