@@ -7,11 +7,43 @@ import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import ScheduleButton from './ScheduleButton';
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+const toDateOnly = (value) => {
+  if (!value) {
+    return new Date();
+  }
+
+  if (value instanceof Date) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+
+  if (typeof value === 'string') {
+    const [datePart] = value.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+
+    if (year && month && day) {
+      return new Date(year, month - 1, day);
+    }
+  }
+
+  const parsed = new Date(value);
+  return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+};
+
+const getDayBefore = (value) => new Date(toDateOnly(value).getTime() - MS_PER_DAY);
+
+const isBeforeToday = (value) => {
+  const today = toDateOnly(new Date());
+  return toDateOnly(value) < today;
+};
+
 function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
   const { auth } = useContext(AuthContext);
   const [salespeople, setSalespeople] = useState([]);
   const [showGetReady, setShowGetReady] = useState(false);
   const [showLoanerRequest, setShowLoanerRequest] = useState(false);
+  const [getReadyDateManuallyChanged, setGetReadyDateManuallyChanged] = useState(false);
   const [getReadyData, setGetReadyData] = useState({
     location: 'annex',
     miles: '',
@@ -19,7 +51,7 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
     comments: '',
     promiseTime: '14:00',
     // Store as Date object to avoid timezone issues in the DatePicker
-    getReadyDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    getReadyDate: getDayBefore(sale.deliveryDate),
     salespersonEmail: auth?.user?.email || ''
   });
   const [loanerRequestData, setLoanerRequestData] = useState({
@@ -87,9 +119,17 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
       ...prevData,
       deliveryDate: date
     }));
+
+    if (!getReadyDateManuallyChanged) {
+      setGetReadyData(prevData => ({
+        ...prevData,
+        getReadyDate: getDayBefore(date)
+      }));
+    }
   };
 
   const handleGetReadyDateChange = (date) => {
+    setGetReadyDateManuallyChanged(true);
     setGetReadyData(prevData => ({
       ...prevData,
       getReadyDate: date
@@ -300,6 +340,8 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
 
   console.log('onSubmit:', onSubmit);
 
+  const getReadyDateIsPast = isBeforeToday(getReadyData.getReadyDate);
+
   return (
     <div className="edit-sale-form-overlay">
       <div className="edit-sale-form">
@@ -482,6 +524,11 @@ function EditSaleForm({ sale, onSubmit, onCancel, onDelete }) {
                       name="getReadyDate"
                       required
                     />
+                    {getReadyDateIsPast && (
+                      <div className="get-ready-date-warning" role="alert">
+                        Warning: this Get Ready date is in the past.
+                      </div>
+                    )}
                   </div>
                   
                   <div>
