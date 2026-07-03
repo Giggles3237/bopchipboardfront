@@ -28,6 +28,7 @@ const NavbarComponent = ({ isDarkMode, onToggleTheme }) => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             {auth?.user && <Nav.Link as={Link} to="/">Home</Nav.Link>}
+            {auth?.user && <Nav.Link as={Link} to="/mission-250">Mission 250</Nav.Link>}
             {auth?.user?.role === 'Admin' && (
               <Nav.Link as={Link} to="/admin">Admin</Nav.Link>
             )}

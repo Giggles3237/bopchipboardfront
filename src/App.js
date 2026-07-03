@@ -25,6 +25,7 @@ import ManagerDashboard from './components/ManagerDashboard';
 import ErrorBoundary from './components/ErrorBoundary';
 import SearchUnifiedVehicles from './components/SearchUnifiedVehicles';
 import TVDashboard from './components/TVDashboard';
+import ContestDashboard from './components/ContestDashboard';
 
 /**
  * App Component
@@ -322,6 +323,11 @@ function App() {
             <Route path="/tv" element={
               <PrivateRoute roles={['Admin', 'Manager']}>
                 <TVDashboard />
+              </PrivateRoute>
+            } />
+            <Route path="/mission-250" element={
+              <PrivateRoute>
+                <ContestDashboard />
               </PrivateRoute>
             } />
             <Route path="/" element={
