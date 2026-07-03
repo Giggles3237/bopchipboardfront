@@ -336,6 +336,7 @@ function ContestDashboard() {
                 <th>Count</th>
                 <th>Rewards</th>
                 <th>Advisor</th>
+                <th>Client</th>
                 <th>Vehicle</th>
                 <th>Type</th>
                 <th>Delivered</th>
@@ -361,6 +362,7 @@ function ContestDashboard() {
                     />
                   </td>
                   <td>{deal.advisor}</td>
+                  <td>{deal.clientName || '-'}</td>
                   <td>{deal.vehicle || deal.stockNumber}</td>
                   <td>
                     <select
