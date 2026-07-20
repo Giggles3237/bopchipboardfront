@@ -20,15 +20,22 @@ function LoanerSheet() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [noSheet, setNoSheet] = useState(false);
+  const [filterTerm, setFilterTerm] = useState('');
+  const filterTermRef = useRef('');
   const iframeRef = useRef(null);
 
-  const isAdmin = auth?.user?.role === 'Admin';
+  const userRole = auth?.user?.role || auth?.user?.role_name;
+  const isAdmin = userRole === 'Admin';
+  const isSalesperson = userRole === 'Salesperson';
+  const canManageLoaners = ['Admin', 'Manager'].includes(userRole);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const response = await axios.get(`${LOANER_API}/loaner-pricing/sheet`);
+        const response = await axios.get(`${LOANER_API}/loaner-pricing/sheet`, {
+          headers: { Authorization: `Bearer ${auth.token}` }
+        });
         if (!cancelled) setSheet(response.data);
       } catch (err) {
         if (cancelled) return;
@@ -42,6 +49,28 @@ function LoanerSheet() {
       }
     })();
     return () => { cancelled = true; };
+  }, [auth.token]);
+
+  const applyPrimaryTableFilter = useCallback((term = filterTermRef.current) => {
+    const doc = iframeRef.current?.contentDocument;
+    const table = doc?.querySelector('table.sortable');
+    const body = table?.tBodies?.[0];
+    if (!body) return;
+
+    const query = term.trim().toLocaleLowerCase();
+    const activeBrand = iframeRef.current?.dataset.activeBrand || 'ALL';
+    let visibleIndex = 0;
+
+    Array.from(body.rows).forEach((row) => {
+      const brandMatches = activeBrand === 'ALL' || row.dataset.brand === activeBrand;
+      const textMatches = !query || row.textContent.toLocaleLowerCase().includes(query);
+      const visible = brandMatches && textMatches;
+      row.style.display = visible ? '' : 'none';
+      if (visible) {
+        row.style.background = visibleIndex % 2 ? '#f8fafc' : '#ffffff';
+        visibleIndex += 1;
+      }
+    });
   }, []);
 
   const resizeIframe = useCallback(() => {
@@ -51,6 +80,58 @@ function LoanerSheet() {
     }
   }, []);
 
+  const prepareIframe = useCallback(() => {
+    const frame = iframeRef.current;
+    const doc = frame?.contentDocument;
+    if (!doc) return;
+
+    frame.dataset.activeBrand = 'ALL';
+    const primaryTable = doc.querySelector('table.sortable');
+    let supplementalSection = primaryTable?.nextElementSibling;
+    while (supplementalSection) {
+      supplementalSection.classList.add('loaner-supplemental-section');
+      if (isSalesperson) supplementalSection.style.display = 'none';
+      supplementalSection = supplementalSection.nextElementSibling;
+    }
+
+    doc.querySelectorAll('#brand-filter button[data-brand]').forEach((button) => {
+      button.addEventListener('click', () => {
+        frame.dataset.activeBrand = button.dataset.brand || 'ALL';
+        window.setTimeout(() => {
+          applyPrimaryTableFilter();
+          resizeIframe();
+        }, 0);
+      });
+    });
+
+    const printStyles = doc.createElement('style');
+    printStyles.textContent = `
+      @media print {
+        #brand-filter, .sort-hint, .loaner-supplemental-section { display: none !important; }
+        body { margin: 0; }
+        table.sortable { break-inside: auto; }
+        table.sortable tr { break-inside: avoid; }
+      }
+    `;
+    doc.head?.appendChild(printStyles);
+
+    applyPrimaryTableFilter();
+    resizeIframe();
+  }, [applyPrimaryTableFilter, isSalesperson, resizeIframe]);
+
+  useEffect(() => {
+    filterTermRef.current = filterTerm;
+    applyPrimaryTableFilter(filterTerm);
+    resizeIframe();
+  }, [applyPrimaryTableFilter, filterTerm, resizeIframe]);
+
+  const handlePrint = () => {
+    const printWindow = iframeRef.current?.contentWindow;
+    if (!printWindow) return;
+    printWindow.focus();
+    printWindow.print();
+  };
+
   if (loading) {
     return <div className="loaner-sheet-loading">Loading loaner sheet...</div>;
   }
@@ -59,8 +140,10 @@ function LoanerSheet() {
     return (
       <div className="loaner-sheet-empty">
         <h2>No loaner sheet yet</h2>
-        <p>Upload the two daily exports to generate the first one.</p>
-        <Link className="loaner-btn" to="/loaners/upload">Upload data</Link>
+        <p>{canManageLoaners
+          ? 'Upload the two daily exports to generate the first one.'
+          : 'Please check back after a manager uploads the daily data.'}</p>
+        {canManageLoaners && <Link className="loaner-btn" to="/loaners/upload">Upload data</Link>}
       </div>
     );
   }
@@ -82,8 +165,8 @@ function LoanerSheet() {
           </span>
           <span className="loaner-sheet-counts">
             {meta.priced} priced
-            {meta.attention ? ` • ${meta.attention} need attention` : ''}
-            {meta.mileageUpdates ? ` • ${meta.mileageUpdates} mileage updates` : ''}
+            {!isSalesperson && meta.attention ? ` | ${meta.attention} need attention` : ''}
+            {!isSalesperson && meta.mileageUpdates ? ` | ${meta.mileageUpdates} mileage updates` : ''}
           </span>
           {staleRates && (
             <div className="loaner-sheet-stale">
@@ -92,7 +175,25 @@ function LoanerSheet() {
           )}
         </div>
         <div className="loaner-sheet-actions">
-          <Link className="loaner-btn" to="/loaners/upload">Upload new data</Link>
+          <label className="loaner-sheet-filter">
+            <span className="visually-hidden">Filter loaners</span>
+            <input
+              type="search"
+              value={filterTerm}
+              onChange={(event) => {
+                filterTermRef.current = event.target.value;
+                setFilterTerm(event.target.value);
+              }}
+              placeholder="Filter this table…"
+              aria-label="Filter loaners in the first table"
+            />
+          </label>
+          <button className="loaner-btn loaner-btn-secondary" type="button" onClick={handlePrint}>
+            Print / Save PDF
+          </button>
+          {canManageLoaners && (
+            <Link className="loaner-btn" to="/loaners/upload">Upload new data</Link>
+          )}
           {isAdmin && (
             <Link className="loaner-btn loaner-btn-secondary" to="/loaners/settings">
               ⚙ Settings
@@ -104,9 +205,9 @@ function LoanerSheet() {
         ref={iframeRef}
         className="loaner-sheet-frame"
         title="Loaner Payment Sheet"
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts allow-same-origin allow-modals"
         srcDoc={html}
-        onLoad={resizeIframe}
+        onLoad={prepareIframe}
       />
     </div>
   );

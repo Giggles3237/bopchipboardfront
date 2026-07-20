@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import { useAuth } from '../contexts/AuthContext';
 import './LoanerSettings.css';
 // While the loaner service runs standalone (before the bopchipboard merge),
 // point these pages at it with REACT_APP_LOANER_API_BASE_URL; once merged,
@@ -34,6 +35,7 @@ const CONFIG_FIELDS = [
 ];
 
 function LoanerSettings() {
+  const { auth } = useAuth();
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,7 +47,9 @@ function LoanerSettings() {
     let cancelled = false;
     (async () => {
       try {
-        const response = await axios.get(`${LOANER_API}/loaner-pricing/settings`);
+        const response = await axios.get(`${LOANER_API}/loaner-pricing/settings`, {
+          headers: { Authorization: `Bearer ${auth.token}` }
+        });
         if (!cancelled) setSettings(response.data.settings);
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || 'Failed to load settings');
@@ -54,7 +58,7 @@ function LoanerSettings() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [auth.token]);
 
   const setField = (name, value) =>
     setSettings((s) => ({ ...s, [name]: value }));
@@ -115,7 +119,9 @@ function LoanerSettings() {
       for (const [name, , step] of CONFIG_FIELDS) {
         if (step !== 'text') payload[name] = Number(payload[name]);
       }
-      const response = await axios.put(`${LOANER_API}/loaner-pricing/settings`, payload);
+      const response = await axios.put(`${LOANER_API}/loaner-pricing/settings`, payload, {
+        headers: { Authorization: `Bearer ${auth.token}` }
+      });
       setSettings(response.data.settings);
       setMessage('Settings saved. New uploads will price with these rates.');
     } catch (err) {
@@ -134,7 +140,9 @@ function LoanerSettings() {
       const formData = new FormData();
       formData.append('workbook', workbookFile);
       const response = await axios.post(
-        `${LOANER_API}/loaner-pricing/settings/import`, formData);
+        `${LOANER_API}/loaner-pricing/settings/import`, formData, {
+          headers: { Authorization: `Bearer ${auth.token}` }
+        });
       setSettings(response.data.settings);
       setMessage(response.data.message);
     } catch (err) {
@@ -144,7 +152,10 @@ function LoanerSettings() {
 
   const handleExport = async () => {
     const response = await axios.get(
-      `${LOANER_API}/loaner-pricing/settings/export`, { responseType: 'blob' });
+      `${LOANER_API}/loaner-pricing/settings/export`, {
+        responseType: 'blob',
+        headers: { Authorization: `Bearer ${auth.token}` }
+      });
     const url = URL.createObjectURL(response.data);
     const link = document.createElement('a');
     link.href = url;

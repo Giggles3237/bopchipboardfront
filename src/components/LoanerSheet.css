@@ -36,7 +36,23 @@
 
 .loaner-sheet-actions {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
+}
+
+.loaner-sheet-filter input {
+  width: 190px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+}
+
+.loaner-sheet-filter input:focus {
+  border-color: #1c69d4;
+  box-shadow: 0 0 0 3px rgba(28, 105, 212, 0.15);
+  outline: none;
 }
 
 .loaner-btn {
@@ -50,6 +66,23 @@
   text-decoration: none;
   cursor: pointer;
   display: inline-block;
+}
+
+button.loaner-btn {
+  font-family: inherit;
+}
+
+@media (max-width: 720px) {
+  .loaner-sheet-actions,
+  .loaner-sheet-filter,
+  .loaner-sheet-filter input {
+    width: 100%;
+  }
+
+  .loaner-sheet-actions .loaner-btn {
+    flex: 1 1 auto;
+    text-align: center;
+  }
 }
 
 .loaner-btn:hover {

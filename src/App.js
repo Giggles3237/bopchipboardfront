@@ -298,7 +298,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/loaners" element={<PrivateRoute><LoanerSheet /></PrivateRoute>} />
-            <Route path="/loaners/upload" element={<PrivateRoute><LoanerUpload /></PrivateRoute>} />
+            <Route path="/loaners/upload" element={<PrivateRoute roles={['Admin', 'Manager']}><LoanerUpload /></PrivateRoute>} />
             <Route path="/loaners/settings" element={<PrivateRoute roles={['Admin']}><LoanerSettings /></PrivateRoute>} />
             <Route path="/unified-search" element={
               <PrivateRoute>
