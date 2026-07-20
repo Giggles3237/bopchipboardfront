@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import { useAuth } from '../contexts/AuthContext';
 import './LoanerUpload.css';
 // While the loaner service runs standalone (before the bopchipboard merge),
 // point these pages at it with REACT_APP_LOANER_API_BASE_URL; once merged,
@@ -11,6 +12,7 @@ const LOANER_API = process.env.REACT_APP_LOANER_API_BASE_URL || API_BASE_URL;
 // Upload the two daily exports and regenerate the loaner payment sheet.
 function LoanerUpload() {
   const navigate = useNavigate();
+  const { auth } = useAuth();
   const [inventoryFile, setInventoryFile] = useState(null);
   const [vautoFile, setVautoFile] = useState(null);
   const [disclosures, setDisclosures] = useState(false);
@@ -30,7 +32,9 @@ function LoanerUpload() {
       formData.append('inventory', inventoryFile);
       formData.append('vauto', vautoFile);
       formData.append('disclosures', disclosures ? 'true' : 'false');
-      await axios.post(`${LOANER_API}/loaner-pricing/generate`, formData);
+      await axios.post(`${LOANER_API}/loaner-pricing/generate`, formData, {
+        headers: { Authorization: `Bearer ${auth.token}` }
+      });
       navigate('/loaners');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to generate the sheet');
