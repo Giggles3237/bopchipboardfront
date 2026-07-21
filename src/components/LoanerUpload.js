@@ -4,16 +4,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 import './LoanerUpload.css';
-// While the loaner service runs standalone (before the bopchipboard merge),
-// point these pages at it with REACT_APP_LOANER_API_BASE_URL; once merged,
-// leave that unset and the chipboard API base is used.
+
 const LOANER_API = process.env.REACT_APP_LOANER_API_BASE_URL || API_BASE_URL;
 
-// Upload the two daily exports and regenerate the loaner payment sheet.
+// Upload the daily exports and regenerate the loaner payment sheet.
 function LoanerUpload() {
   const navigate = useNavigate();
   const { auth } = useAuth();
-  const [inventoryFile, setInventoryFile] = useState(null);
+  const [bmwInventoryFile, setBmwInventoryFile] = useState(null);
+  const [miniInventoryFile, setMiniInventoryFile] = useState(null);
   const [vautoFile, setVautoFile] = useState(null);
   const [disclosures, setDisclosures] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -21,15 +20,16 @@ function LoanerUpload() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!inventoryFile || !vautoFile) {
-      setError('Both files are required.');
+    const inventoryFiles = [bmwInventoryFile, miniInventoryFile].filter(Boolean);
+    if (!inventoryFiles.length || !vautoFile) {
+      setError('At least one BMW or MINI inventory file and the vAuto file are required.');
       return;
     }
     setSubmitting(true);
     setError(null);
     try {
       const formData = new FormData();
-      formData.append('inventory', inventoryFile);
+      inventoryFiles.forEach((file) => formData.append('inventory', file));
       formData.append('vauto', vautoFile);
       formData.append('disclosures', disclosures ? 'true' : 'false');
       await axios.post(`${LOANER_API}/loaner-pricing/generate`, formData, {
@@ -47,23 +47,43 @@ function LoanerUpload() {
     <div className="loaner-upload-page">
       <div className="loaner-upload-header">
         <h2>Upload fresh loaner data</h2>
-        <Link className="loaner-upload-back" to="/loaners">← Current sheet</Link>
+        <Link className="loaner-upload-back" to="/loaners">Current sheet</Link>
       </div>
       <p className="loaner-upload-sub">
-        The two daily exports — rates come from the app's settings.
+        Upload the BMW and MINI Full Inventory Reports separately, then add the vAuto calculator export.
       </p>
       {error && <div className="loaner-upload-error">{error}</div>}
       <form onSubmit={handleSubmit}>
+        <div className="loaner-upload-grid">
+          <div>
+            <label className="loaner-upload-label">
+              BMW Full Inventory Report <small>(.xlsx; current miles)</small>
+            </label>
+            <input
+              type="file"
+              accept=".xlsx"
+              onChange={(e) => setBmwInventoryFile(e.target.files[0] || null)}
+            />
+            {bmwInventoryFile && (
+              <div className="loaner-upload-selected">{bmwInventoryFile.name}</div>
+            )}
+          </div>
+          <div>
+            <label className="loaner-upload-label">
+              MINI Full Inventory Report <small>(.xlsx; current miles)</small>
+            </label>
+            <input
+              type="file"
+              accept=".xlsx"
+              onChange={(e) => setMiniInventoryFile(e.target.files[0] || null)}
+            />
+            {miniInventoryFile && (
+              <div className="loaner-upload-selected">{miniInventoryFile.name}</div>
+            )}
+          </div>
+        </div>
         <label className="loaner-upload-label">
-          Full Inventory Report <small>(.xlsx from the fleet software — current miles)</small>
-        </label>
-        <input
-          type="file"
-          accept=".xlsx"
-          onChange={(e) => setInventoryFile(e.target.files[0] || null)}
-        />
-        <label className="loaner-upload-label">
-          Payment Calculator export <small>(.xls/.xlsx from vAuto — the loaner list)</small>
+          Payment Calculator export <small>(.xls/.xlsx from vAuto; the loaner list)</small>
         </label>
         <input
           type="file"
@@ -72,7 +92,7 @@ function LoanerUpload() {
         />
         <div className="loaner-upload-actions">
           <button className="loaner-btn" type="submit" disabled={submitting}>
-            {submitting ? 'Generating…' : 'Generate payment sheet'}
+            {submitting ? 'Generating...' : 'Generate payment sheet'}
           </button>
           <label className="loaner-upload-check">
             <input

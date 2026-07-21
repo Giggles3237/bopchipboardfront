@@ -54,6 +54,12 @@
   font-weight: normal;
 }
 
+.loaner-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .loaner-upload-page input[type='file'] {
   width: 100%;
   padding: 10px;
@@ -62,6 +68,12 @@
   background: #fafafa;
   font-size: 13px;
   box-sizing: border-box;
+}
+
+.loaner-upload-selected {
+  margin-top: 6px;
+  color: #4b5563;
+  font-size: 12px;
 }
 
 .loaner-upload-actions {
@@ -75,4 +87,10 @@
 .loaner-upload-check {
   font-size: 13px;
   color: #262626;
+}
+
+@media (max-width: 640px) {
+  .loaner-upload-grid {
+    grid-template-columns: 1fr;
+  }
 }
