@@ -27,6 +27,7 @@ function ContestDashboard() {
   const [selectedAdvisor, setSelectedAdvisor] = useState('');
 
   const isManager = ['Admin', 'Manager'].includes(auth?.user?.role);
+  const isAdmin = auth?.user?.role === 'Admin';
 
   const fetchContest = useCallback(async () => {
     try {
@@ -39,13 +40,16 @@ function ContestDashboard() {
         contest: response.data.contest,
         categories: response.data.categories
       });
+      if (!response.data.contest.is_enabled && auth?.user?.role === 'Admin') {
+        setActiveTab('admin');
+      }
       setError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Unable to load contest');
     } finally {
       setLoading(false);
     }
-  }, [auth.token]);
+  }, [auth.token, auth?.user?.role]);
 
   useEffect(() => {
     fetchContest();
@@ -137,6 +141,7 @@ function ContestDashboard() {
       );
       setBundle(response.data);
       setSetup({ contest: response.data.contest, categories: response.data.categories });
+      window.dispatchEvent(new Event('contest-availability-changed'));
       setError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Unable to save contest setup');
@@ -169,6 +174,11 @@ function ContestDashboard() {
 
   return (
     <div className="contest-page">
+      {!contest.is_enabled && isAdmin && (
+        <div className="contest-disabled-notice">
+          Mission 250 is off. Only admins can access this page until it is turned back on.
+        </div>
+      )}
       {contest.is_complete || contest.status === 'closed' ? (
         <div className="contest-complete">
           <div className="confetti-strip" />
@@ -407,10 +417,10 @@ function ContestDashboard() {
                 <input type="number" value={setup.contest.target_points || 0} onChange={(event) => setSetup({ ...setup, contest: { ...setup.contest, target_points: Number(event.target.value) } })} />
               </label>
               <label>
-                Enable Contest
-                <select value={setup.contest.status === 'active' ? 'active' : 'draft'} onChange={(event) => setSetup({ ...setup, contest: { ...setup.contest, status: event.target.value } })}>
-                  <option value="active">YES</option>
-                  <option value="draft">NO</option>
+                Mission 250
+                <select value={setup.contest.is_enabled ? 'on' : 'off'} onChange={(event) => setSetup({ ...setup, contest: { ...setup.contest, is_enabled: event.target.value === 'on' } })}>
+                  <option value="on">ON</option>
+                  <option value="off">OFF</option>
                 </select>
               </label>
               <button disabled={saving}>Save Contest</button>
