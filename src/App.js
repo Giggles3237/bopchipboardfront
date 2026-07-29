@@ -26,6 +26,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import SearchUnifiedVehicles from './components/SearchUnifiedVehicles';
 import TVDashboard from './components/TVDashboard';
 import ContestDashboard from './components/ContestDashboard';
+import MarketingPage from './components/MarketingPage';
 
 /**
  * App Component
@@ -331,8 +332,9 @@ function App() {
               </PrivateRoute>
             } />
             <Route path="/" element={
-              <PrivateRoute>
-                <>
+              auth?.user ? (
+                <PrivateRoute>
+                  <>
                   <ViewToggleBar />
                   <div className="search-date-container">
                     <div className="search-bar">
@@ -376,8 +378,11 @@ function App() {
                   <div className="zoom-125">
                     <ChipTable sales={filteredSales || sales} onEdit={setEditingSale} />
                   </div>
-                </>
-              </PrivateRoute>
+                  </>
+                </PrivateRoute>
+              ) : (
+                <MarketingPage />
+              )
             } />
             <Route path="/sales-table" element={
               <PrivateRoute>
