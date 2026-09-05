@@ -84,10 +84,33 @@ function AdminDashboard() {
         try {
             if (editingUser) {
                 console.log('Updating user with ID:', editingUser.id);
-                const response = await axios.put(`${API_BASE_URL}/users/${editingUser.id}`, formData, {
-                    headers: { Authorization: `Bearer ${auth.token}` }
-                });
-                console.log('Update response:', response.data);
+                const requestConfig = { headers: { Authorization: `Bearer ${auth.token}` } };
+                await axios.put(`${API_BASE_URL}/users/${editingUser.id}/profile`, {
+                        name: formData.name,
+                        email: formData.email,
+                        organization: formData.organization,
+                        ethos_training_complete: formData.ethos_training_complete,
+                        bmw_training_complete: formData.bmw_training_complete
+                    }, requestConfig);
+
+                const originalRole = editingUser.role_name || editingUser.role;
+                if (formData.role !== originalRole) {
+                    await axios.put(`${API_BASE_URL}/users/${editingUser.id}/role`, {
+                        role: formData.role
+                    }, requestConfig);
+                }
+
+                if (formData.status !== (editingUser.status || 'active')) {
+                    await axios.put(`${API_BASE_URL}/users/${editingUser.id}/status`, {
+                        status: formData.status
+                    }, requestConfig);
+                }
+
+                if (formData.password) {
+                    await axios.put(`${API_BASE_URL}/users/${editingUser.id}/password`, {
+                        newPassword: formData.password
+                    }, requestConfig);
+                }
                 setSuccess('User updated successfully');
             } else {
                 const response = await axios.post(`${API_BASE_URL}/users`, formData, {
@@ -575,4 +598,4 @@ function AdminDashboard() {
     );
 }
 
-export default AdminDashboard; 
+export default AdminDashboard;
