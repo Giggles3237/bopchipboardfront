@@ -11,6 +11,7 @@ import DateRangePicker from './components/DateRangePicker';
 import NavbarComponent from './components/Navbar';
 import Inbound from './components/Inbound';
 import AddNewSale from './components/AddNewSale';
+import StandaloneGetReady from './components/StandaloneGetReady';
 import EditSaleForm from './components/EditSaleForm';
 import Login from './components/Login';
 import { AuthContext } from './contexts/AuthContext';
@@ -309,6 +310,12 @@ function App() {
             <Route path="/inbound" element={
               <PrivateRoute>
                 <Inbound handleSaleUpdate={handleSaleUpdate} />
+              </PrivateRoute>
+            } />
+            <Route path="/get-ready" element={
+              <PrivateRoute roles={['Admin', 'Manager']}>
+                <ViewToggleBar />
+                <StandaloneGetReady />
               </PrivateRoute>
             } />
             <Route path="/add-sale" element={
